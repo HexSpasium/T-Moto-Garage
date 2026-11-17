@@ -21,7 +21,7 @@ Project: `oxvftybytcwpdcqygxpp` (EU Central / Frankfurt).
 
 Applied migrations are tracked in `supabase/migrations/`:
 - `20261117165419_initial_service_management_schema.sql`
-- `20261117165730_index_foreign_key_columns.sql`
+- `20261117165453_index_foreign_key_columns.sql`
 
 Core tables:
 - `admin_users`: explicitly allowlisted staff accounts and roles
