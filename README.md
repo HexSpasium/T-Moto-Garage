@@ -55,3 +55,11 @@ The Supabase security advisor flags this RPC because it is intentionally callabl
 
 ## Deployment
 Build with `npm run build`; deploy the generated `dist` folder to a static host. Configure SPA fallback to `index.html` for client-side routes.
+
+### Plate-based customer lookup
+Customers can look up published motorcycle service history without the QR code:
+1. Enter the registration plate and the phone number on the linked customer record.
+2. Complete Supabase Auth SMS OTP verification.
+3. The `plate-service-lookup` Edge Function validates the signed-in phone against the linked customer record server-side and returns only the published projection also used by the QR route. It never returns customer phone details.
+
+Enable Phone authentication and configure an SMS provider under Supabase Dashboard → Authentication → Providers → Phone before using this flow in production. Vehicles must be linked to a customer record with a correct phone number, and vehicle/service records must be published. Keep Edge Function JWT verification enabled.
