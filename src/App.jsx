@@ -9,9 +9,9 @@ import { supabase, supabaseConfigured } from "./lib/supabase";
 import AdminPanel from "./admin/AdminPanel";
 
 const showcase = [
-  { make: "250 CC", model: "Racing Sport", year: "RACING", category: "250 CC RACING", image: "https://www.cfmoto.com/content/dam/cfmoto/site/global/product/motorcycle/sr---sport-racing/250sr0/1/06.jpg", tag: "RACING SERİSİ" },
-  { make: "250 CC", model: "Sport Racing", year: "RACING", category: "250 CC RACING", image: "https://d1uzk9o9cg136f.cloudfront.net/f/16782548/rc/2020/09/17/5900a4ba1744b5015c85f058fdaf506563736038_xlarge.jpg", tag: "SPORT TASARIM" },
-  { make: "250 CC", model: "Maxi Scooter", year: "SCOOTER", category: "250 CC SCOOTER", image: "https://okinews.disway.id/upload/e46338c5abb890795387cffa8072a969.jpg", tag: "ŞEHİR & KONFOR" },
+  { make: "MOTUL", model: "7100 4T", year: "MOTOSİKLET YAĞI", category: "TAM SENTETİK MOTOR YAĞI", image: "https://cms.motul.com/images/Moto_GP_Series_2025_Group_1_064f1058aa.png", tag: "YÜKSEK PERFORMANS" },
+  { make: "CASTROL", model: "POWER1 4T", year: "MOTOSİKLET YAĞI", category: "4 ZAMANLI MOTOR YAĞI", image: "https://m.media-amazon.com/images/S/aplus-media-library-service-media/8a740755-0af8-4cd6-bd46-8ab0adf177f8.__CR0%2C0%2C970%2C600_PT0_SX970_V1___.jpg", tag: "GÜÇ VE KORUMA" },
+  { make: "SHELL", model: "ADVANCE 4T", year: "MOTOSİKLET YAĞI", category: "MOTOSİKLET MOTOR YAĞI", image: "https://www.shell.com.my/fuels-oils-and-lubricants/shell-engine-oils/helix-for-cars/pureplus/_jcr_content/root/main/section_947185513/promo_copy_copy.shellimg.jpeg/1693313892396/shell-advance-fuel-family.jpeg", tag: "GÜNLÜK SÜRÜŞ" },
 ];
 
 function Header() {
