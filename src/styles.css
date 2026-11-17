@@ -85,3 +85,9 @@
 .plate-lookup-result>h3{font:800 12px "Barlow Condensed",sans-serif;letter-spacing:.1em;color:#d2cbc4;margin-bottom:12px}
 .plate-lookup-result .record-card{margin-bottom:12px}
 @media(max-width:600px){.plate-lookup-page{padding:48px 14px 70px}.plate-lookup-card{padding:22px 17px}}
+
+
+/* Public vehicle photos in QR and plate lookup results */
+.record-vehicle-gallery,.plate-result-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:28px 0 10px}
+.record-vehicle-gallery img,.plate-result-gallery img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:#171717}
+@media(max-width:600px){.record-vehicle-gallery,.plate-result-gallery{grid-template-columns:1fr}.record-vehicle-gallery img,.plate-result-gallery img{aspect-ratio:16/11}}
