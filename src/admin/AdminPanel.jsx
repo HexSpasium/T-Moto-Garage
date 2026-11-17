@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Activity, Bike, Boxes, ClipboardList, LayoutDashboard, LogOut, Plus, RefreshCw, Search, Users, Wrench, X, CheckCircle2, AlertCircle } from "lucide-react";
+import { Activity, Bike, Boxes, ClipboardList, LayoutDashboard, LogOut, Plus, RefreshCw, Search, Users, Wrench, X, CheckCircle2, AlertCircle, QrCode, Copy } from "lucide-react";
+import QRCode from "qrcode";
 import { supabase } from "../lib/supabase";
 
 const STATUSES = [["received","Servise kabul"],["inspection","Arıza tespiti"],["waiting_approval","Onay bekliyor"],["waiting_parts","Parça bekliyor"],["in_progress","İşlemde"],["quality_check","Son kontrol"],["ready_for_pickup","Teslime hazır"],["delivered","Teslim edildi"],["cancelled","İptal"]];
@@ -13,6 +14,7 @@ export default function AdminPanel() {
   const [loading,setLoading] = useState(true), [saving,setSaving] = useState(false);
   const [error,setError] = useState(""), [notice,setNotice] = useState("");
   const [modal,setModal] = useState(false), [form,setForm] = useState({});
+  const [qr,setQr] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -96,6 +98,11 @@ export default function AdminPanel() {
     if(e) setError(e.message); else setNotice(item.is_published?"QR sayfasından gizlendi.":"QR sayfasında yayınlandı.");
     await load();
   }
+  async function showQr(vehicle) {
+    const url = window.location.origin + "/takip/" + vehicle.qr_token;
+    try { const image = await QRCode.toDataURL(url,{width:420,margin:2,color:{dark:"#111111",light:"#ffffff"}}); setQr({image,url,plate:vehicle.plate,make:vehicle.make,model:vehicle.model}); }
+    catch(e) { setError("QR kodu oluşturulamadı: "+e.message); }
+  }
   async function signOut(){await supabase.auth.signOut();window.location.assign("/admin");}
 
   const menus=[["overview",LayoutDashboard,"Genel Bakış"],["services",ClipboardList,"Servis Kayıtları"],["vehicles",Bike,"Motosikletler"],["customers",Users,"Müşteriler"],["parts",Boxes,"Parça Kataloğu"]];
@@ -121,16 +128,17 @@ export default function AdminPanel() {
         {section==="overview"&&<>
           <div className="tm-stat-grid"><Stat Icon={ClipboardList} label="Toplam servis" value={data.services.length}/><Stat Icon={Activity} label="Aktif servis" value={counts.active}/><Stat Icon={Bike} label="Motosiklet" value={data.vehicles.length}/><Stat Icon={Users} label="Müşteri" value={data.customers.length}/></div>
           <div className="tm-overview-grid"><div className="tm-panel"><PanelHead title="Son servis kayıtları" action="Tümünü gör →" onClick={()=>setSection("services")}/><ServiceTable items={data.services.slice(0,5)} onStatus={changeStatus}/></div><div className="tm-panel"><PanelHead title="Hızlı işlemler"/>{[["service","Servis kaydı",ClipboardList],["vehicle","Motosiklet",Bike],["customer","Müşteri",Users],["part","Parça",Boxes]].map(([kind,label,Icon])=><button className="tm-quick" key={kind} onClick={()=>openForm(kind)}><Icon size={16}/>{label}<Plus size={14}/></button>)}</div></div>
-          <div className="tm-panel"><PanelHead title="Son eklenen motosikletler" action="Motosikletlere git →" onClick={()=>setSection("vehicles")}/><VehicleTable items={data.vehicles.slice(0,5)} onPublish={publish}/></div>
+          <div className="tm-panel"><PanelHead title="Son eklenen motosikletler" action="Motosikletlere git →" onClick={()=>setSection("vehicles")}/><VehicleTable items={data.vehicles.slice(0,5)} onPublish={publish} onQr={showQr}/></div>
         </>}
         {section==="services"&&<div className="tm-panel"><Toolbar value={search} onChange={setSearch} placeholder="Servis no, plaka veya model ara"/><ServiceTable items={filtered(data.services,["service_number","vehicles.plate","vehicles.make","vehicles.model"])} onStatus={changeStatus}/></div>}
-        {section==="vehicles"&&<div className="tm-panel"><Toolbar value={search} onChange={setSearch} placeholder="Plaka, marka, model veya müşteri ara"/><VehicleTable items={filtered(data.vehicles,["plate","make","model","customers.full_name"])} onPublish={publish}/></div>}
+        {section==="vehicles"&&<div className="tm-panel"><Toolbar value={search} onChange={setSearch} placeholder="Plaka, marka, model veya müşteri ara"/><VehicleTable items={filtered(data.vehicles,["plate","make","model","customers.full_name"])} onPublish={publish} onQr={showQr}/></div>}
         {section==="customers"&&<div className="tm-panel"><Toolbar value={search} onChange={setSearch} placeholder="Müşteri, telefon veya e-posta ara"/><CustomerTable items={filtered(data.customers,["full_name","phone","email"])}/></div>}
         {section==="parts"&&<div className="tm-panel"><Toolbar value={search} onChange={setSearch} placeholder="Parça adı, kategori veya marka ara"/><PartsTable items={filtered(data.parts,["name","category","brand","part_number"])}/></div>}
         {loading&&<div className="tm-loading">VERİLER YÜKLENİYOR...</div>}
         {!loading&&data.customers.length===0&&data.vehicles.length===0&&data.services.length===0&&<div className="tm-empty-state"><Wrench/><b>Garaj henüz boş.</b><span>İlk müşteri veya motosiklet kaydınızı oluşturun.</span><button className="tm-button" onClick={()=>openForm("customer")}><Plus size={15}/> İlk müşteriyi ekle</button></div>}
       </div>
     </section>
+    {qr&&<div className="tm-modal-bg" onMouseDown={e=>{if(e.target===e.currentTarget)setQr(null);}}><div className="tm-modal tm-qr-modal"><div className="tm-modal-head"><div><small>PRIVATE QR SERVICE LINK</small><h2>{qr.plate} · {qr.make} {qr.model}</h2></div><button onClick={()=>setQr(null)}><X/></button></div><img src={qr.image} alt="Motosiklet servis QR kodu"/><p>{qr.url}</p><div className="tm-modal-actions"><button className="tm-button tm-outline" onClick={()=>{navigator.clipboard?.writeText(qr.url);setNotice("QR bağlantısı kopyalandı.");}}><Copy size={15}/> Bağlantıyı kopyala</button><a className="tm-button" href={qr.image} download={"tmoto-qr-"+qr.plate+".png"}>QR indir</a></div></div></div>}
     {modal&&<div className="tm-modal-bg" onMouseDown={e=>{if(e.target===e.currentTarget)setModal(false);}}><form className="tm-modal" onSubmit={save}>
       <div className="tm-modal-head"><div><small>NEW GARAGE ENTRY</small><h2>{{customer:"Yeni müşteri",vehicle:"Yeni motosiklet",service:"Yeni servis kaydı",part:"Parça kataloğuna ekle"}[form.kind]}</h2></div><button type="button" onClick={()=>setModal(false)}><X/></button></div>
       {form.kind==="customer"&&<><Field label="Ad soyad" required value={form.full_name} set={v=>setForm({...form,full_name:v})}/><Field label="Telefon" value={form.phone} set={v=>setForm({...form,phone:v})}/><Field label="E-posta" type="email" value={form.email} set={v=>setForm({...form,email:v})}/><Field label="Notlar" value={form.notes} set={v=>setForm({...form,notes:v})}/></>}
@@ -147,7 +155,7 @@ function Toolbar({value,onChange,placeholder}){return <div className="tm-toolbar
 function Field({label,value,set,type="text",required=false}){return <label className="tm-field">{label}<input type={type} required={required} value={value??""} onChange={e=>set(e.target.value)}/></label>}
 function SelectField({label,value,set,options,empty="Seçiniz"}){return <label className="tm-field">{label}<select value={value??""} onChange={e=>set(e.target.value)}><option value="">{empty}</option>{options.map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label>}
 function ServiceTable({items,onStatus}){if(!items.length)return <Empty text="Henüz servis kaydı yok."/>;return <div className="tm-table-wrap"><table className="tm-table"><thead><tr><th>SERVİS NO</th><th>MOTOSİKLET</th><th>GİRİŞ</th><th>DURUM</th></tr></thead><tbody>{items.map(x=><tr key={x.id}><td>#{x.service_number}</td><td><b>{x.vehicles?.make} {x.vehicles?.model}</b><small>{x.vehicles?.plate}</small></td><td>{dateLabel(x.received_at)}</td><td><select value={x.status} onChange={e=>onStatus(x,e.target.value)}>{STATUSES.map(([k,v])=><option key={k} value={k}>{v}</option>)}</select></td></tr>)}</tbody></table></div>}
-function VehicleTable({items,onPublish}){if(!items.length)return <Empty text="Henüz motosiklet kaydı yok."/>;return <div className="tm-table-wrap"><table className="tm-table"><thead><tr><th>MOTOSİKLET</th><th>PLAKA</th><th>MÜŞTERİ</th><th>QR</th><th></th></tr></thead><tbody>{items.map(x=><tr key={x.id}><td><b>{x.make} {x.model}</b><small>{x.production_year||"—"} · {x.mileage_km||"—"} km</small></td><td>{x.plate}</td><td>{x.customers?.full_name||"—"}</td><td>{x.is_published?"YAYINDA":"GİZLİ"}</td><td><button className="tm-mini" onClick={()=>onPublish("vehicles",x)}>{x.is_published?"Gizle":"Yayınla"}</button></td></tr>)}</tbody></table></div>}
+function VehicleTable({items,onPublish,onQr}){if(!items.length)return <Empty text="Henüz motosiklet kaydı yok."/>;return <div className="tm-table-wrap"><table className="tm-table"><thead><tr><th>MOTOSİKLET</th><th>PLAKA</th><th>MÜŞTERİ</th><th>QR</th><th>İŞLEM</th></tr></thead><tbody>{items.map(x=><tr key={x.id}><td><b>{x.make} {x.model}</b><small>{x.production_year||"—"} · {x.mileage_km||"—"} km</small></td><td>{x.plate}</td><td>{x.customers?.full_name||"—"}</td><td>{x.is_published?"YAYINDA":"GİZLİ"}</td><td><button className="tm-mini" onClick={()=>onQr(x)}><QrCode size={13}/> QR</button> <button className="tm-mini" onClick={()=>onPublish("vehicles",x)}>{x.is_published?"Gizle":"Yayınla"}</button></td></tr>)}</tbody></table></div>}
 function CustomerTable({items}){if(!items.length)return <Empty text="Henüz müşteri yok."/>;return <div className="tm-table-wrap"><table className="tm-table"><thead><tr><th>MÜŞTERİ</th><th>TELEFON</th><th>E-POSTA</th><th>KAYIT</th></tr></thead><tbody>{items.map(x=><tr key={x.id}><td>{x.full_name}</td><td>{x.phone||"—"}</td><td>{x.email||"—"}</td><td>{dateLabel(x.created_at)}</td></tr>)}</tbody></table></div>}
 function PartsTable({items}){if(!items.length)return <Empty text="Parça kataloğu boş."/>;return <div className="tm-table-wrap"><table className="tm-table"><thead><tr><th>PARÇA</th><th>KATEGORİ</th><th>MARKA</th><th>PARÇA NO</th></tr></thead><tbody>{items.map(x=><tr key={x.id}><td>{x.name}</td><td>{x.category}</td><td>{x.brand||"—"}</td><td>{x.part_number||"—"}</td></tr>)}</tbody></table></div>}
 function Empty({text}){return <div className="tm-empty">{text}</div>}
