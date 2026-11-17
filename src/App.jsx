@@ -9,9 +9,9 @@ import { supabase, supabaseConfigured } from "./lib/supabase";
 import AdminPanel from "./admin/AdminPanel";
 
 const showcase = [
-  { make: "DUCATI", model: "Panigale V4 S", year: "2024", category: "SÜPER SPORT", image: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1100&q=78", tag: "YÜKSEK PERFORMANS" },
-  { make: "BMW", model: "S 1000 RR", year: "2023", category: "SÜPER SPORT", image: "https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=1100&q=78", tag: "ÖZENLİ İŞÇİLİK" },
-  { make: "YAMAHA", model: "MT-09 SP", year: "2024", category: "HİPER NAKED", image: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=1100&q=78", tag: "TEKNİK UZMANLIK" },
+  { make: "250 CC", model: "Racing Sport", year: "RACING", category: "250 CC RACING", image: "https://www.cfmoto.com/content/dam/cfmoto/site/global/product/motorcycle/sr---sport-racing/250sr0/1/06.jpg", tag: "RACING SERİSİ" },
+  { make: "250 CC", model: "Sport Racing", year: "RACING", category: "250 CC RACING", image: "https://d1uzk9o9cg136f.cloudfront.net/f/16782548/rc/2020/09/17/5900a4ba1744b5015c85f058fdaf506563736038_xlarge.jpg", tag: "SPORT TASARIM" },
+  { make: "250 CC", model: "Maxi Scooter", year: "SCOOTER", category: "250 CC SCOOTER", image: "https://okinews.disway.id/upload/e46338c5abb890795387cffa8072a969.jpg", tag: "ŞEHİR & KONFOR" },
 ];
 
 function Header() {
