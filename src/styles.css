@@ -9,3 +9,33 @@
 @media(max-width:650px){.tm-admin{display:block}.tm-sidebar{position:relative;height:auto;min-height:0;padding:13px}.tm-admin-brand{padding:0 5px 12px}.tm-admin-brand>span{font-size:28px}.tm-side-caption,.tm-sidebar-bottom{display:none}.tm-sidebar nav{display:flex;overflow:auto;padding-top:10px}.tm-sidebar nav button{white-space:nowrap;padding:10px;font-size:9px}.tm-topbar{height:58px;padding:0 5%}.tm-content{padding:27px 5% 55px}.tm-welcome{align-items:flex-start;flex-direction:column}.tm-welcome .tm-button{width:100%}.tm-stat-grid{gap:8px}.tm-stat{padding:12px;gap:8px}.tm-stat b{font-size:23px}.tm-form-grid{grid-template-columns:1fr}.tm-modal{padding:18px}}
 
 .tm-qr-modal{display:grid;justify-items:center}.tm-qr-modal .tm-modal-head{width:100%}.tm-qr-modal img{width:min(280px,80%);height:auto;background:white;padding:12px}.tm-qr-modal>p{font-size:9px;color:#999;overflow-wrap:anywhere;text-align:center}.tm-qr-modal .tm-modal-actions{width:100%;flex-wrap:wrap}.tm-qr-modal .tm-modal-actions a{text-decoration:none}
+
+/* Editable vehicle/service records and private image library */
+.tm-entry-modal{max-width:760px;max-height:calc(100vh - 28px);overflow:auto}
+.tm-subsection{border-top:1px solid #303030;margin-top:20px;padding-top:16px}
+.tm-subsection>b,.tm-subsection-head>b{font:800 17px "Barlow Condensed",sans-serif;color:#eee}
+.tm-subsection-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.tm-part-editor{background:#0a0a0a;border:1px solid #333;padding:14px;margin:10px 0}
+.tm-part-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.tm-danger{color:#ff987d!important;border-color:#744333!important}
+.tm-media-section{margin:15px 0}
+.tm-media-section>b{display:block;font-size:10px;color:#ddd;margin-bottom:10px}
+.tm-media-section>small{color:#777;font-size:9px}
+.tm-media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:10px}
+.tm-media-thumb{min-width:0;border:1px solid #343434;background:#090909;padding:7px;display:grid;gap:6px}
+.tm-media-thumb img{width:100%;height:100px;object-fit:cover;background:#181818}
+.tm-media-thumb>span{height:100px;display:grid;place-items:center;color:#777;font-size:9px}
+.tm-media-thumb>small{font-size:9px;color:#aaa;overflow-wrap:anywhere}
+.tm-media-thumb>button{display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid #53382d;background:#17100d;color:#f2a07e;padding:6px;font-size:9px;cursor:pointer}
+.tm-file-picker{border:1px dashed #494039;padding:12px;margin-top:12px}
+.tm-upload-button{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;background:#211811;border:1px solid #65432f;color:#f3a16f;font-size:10px;cursor:pointer}
+.tm-upload-button input{display:none}
+.tm-file-picker>small{display:block;color:#777;font-size:9px;margin-top:8px}
+.tm-selected-files{display:grid;gap:5px;margin-top:9px}
+.tm-selected-files>div{display:flex;align-items:center;gap:8px;color:#bbb;font-size:9px;background:#171717;padding:7px}
+.tm-selected-files span{flex:1;overflow:hidden;text-overflow:ellipsis}
+.tm-selected-files button{background:none;border:0;color:#f29a76;font-size:17px;cursor:pointer}
+.tm-private-note{display:flex;align-items:flex-start;gap:8px;color:#9b9b9b;font-size:9px;line-height:1.6;margin:16px 0}
+.tm-private-note svg{flex:none;color:#f26a21}
+.tm-entry-modal .tm-field input[type="datetime-local"]{color-scheme:dark}
+@media(max-width:650px){.tm-entry-modal{padding:15px}.tm-part-bottom{align-items:flex-start;flex-direction:column}.tm-subsection-head{align-items:flex-start;flex-direction:column}.tm-media-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
