@@ -63,3 +63,7 @@ Customers can look up published motorcycle service history without the QR code:
 3. The `plate-service-lookup` Edge Function validates the signed-in phone against the linked customer record server-side and returns only the published projection also used by the QR route. It never returns customer phone details.
 
 Enable Phone authentication and configure an SMS provider under Supabase Dashboard → Authentication → Providers → Phone before using this flow in production. Vehicles must be linked to a customer record with a correct phone number, and vehicle/service records must be published. Keep Edge Function JWT verification enabled.
+
+
+## Plaka ile servis sorgulama
+Müşteriler QR kod olmadan plaka girerek yayınlanmış servis geçmişini görüntüleyebilir. SMS doğrulaması yoktur. Bu sorgulama herkese açıktır; müşteri iletişim bilgileri ve özel servis notları döndürülmez.
