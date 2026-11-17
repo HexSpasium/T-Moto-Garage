@@ -25,9 +25,9 @@ function Header() {
       {open ? <X /> : <Menu />}
     </button>
     <nav className={open ? "nav nav-open" : "nav"}>
-      <a href="/#services" onClick={() => setOpen(false)}>HİZMETLER</a>
-      <a href="/#workshop" onClick={() => setOpen(false)}>GARAJ</a>
-      <a href="/#tracking" onClick={() => setOpen(false)}>SERVİS TAKİBİ</a>
+      <a href={`${import.meta.env.BASE_URL}#services`} onClick={() => setOpen(false)}>HİZMETLER</a>
+      <a href={`${import.meta.env.BASE_URL}#workshop`} onClick={() => setOpen(false)}>GARAJ</a>
+      <a href={`${import.meta.env.BASE_URL}#tracking`} onClick={() => setOpen(false)}>SERVİS TAKİBİ</a>
       <Link className="nav-admin" to="/admin" onClick={() => setOpen(false)}><KeyRound size={15}/> YÖNETİCİ GİRİŞİ</Link>
     </nav>
   </header>;
