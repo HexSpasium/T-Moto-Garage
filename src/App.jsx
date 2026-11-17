@@ -9,9 +9,9 @@ import { supabase, supabaseConfigured } from "./lib/supabase";
 import AdminPanel from "./admin/AdminPanel";
 
 const showcase = [
-  { make: "DUCATI", model: "Panigale V4 S", year: "2024", category: "SÜPER SPORT", image: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1100&q=78", tag: "PERFORMANS" },
-  { make: "BMW", model: "S 1000 RR", year: "2023", category: "SÜPER SPORT", image: "https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=1100&q=78", tag: "HASSASİYET" },
-  { make: "YAMAHA", model: "MT-09 SP", year: "2024", category: "HİPER NAKED", image: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=1100&q=78", tag: "MÜHENDİSLİK" },
+  { make: "DUCATI", model: "Panigale V4 S", year: "2024", category: "SÜPER SPORT", image: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1100&q=78", tag: "YÜKSEK PERFORMANS" },
+  { make: "BMW", model: "S 1000 RR", year: "2023", category: "SÜPER SPORT", image: "https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=1100&q=78", tag: "ÖZENLİ İŞÇİLİK" },
+  { make: "YAMAHA", model: "MT-09 SP", year: "2024", category: "HİPER NAKED", image: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=1100&q=78", tag: "TEKNİK UZMANLIK" },
 ];
 
 function Header() {
@@ -53,7 +53,7 @@ function Home() {
       <div className="hero-grain"/>
       <div className="hero-content">
         <div className="eyebrow"><span className="eyebrow-line"/> MOTOSİKLET BAKIMI / SÜRÜCÜLER İÇİN</div>
-        <h1>GÜÇ İÇİN<br/><em>TASARLANDI.</em></h1>
+        <h1>PERFORMANS İÇİN<br/><em>ÜRETİLDİ.</em></h1>
         <p className="hero-sub">Her makinenin bir karakteri var.<br/>Biz onu en iyi halinde tutuyoruz.</p>
         <div className="hero-actions">
           <a className="button button-primary" href="#services">GARAJI KEŞFET <ArrowUpRight size={16}/></a>
