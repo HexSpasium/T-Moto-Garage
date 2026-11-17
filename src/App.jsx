@@ -91,8 +91,8 @@ function Home() {
     <section className="tracking-section" id="tracking">
       <div className="tracking-copy"><p className="eyebrow">03 / DIGITAL SERVICE HISTORY</p><h2>HER ŞEY<br/><em>KAYIT ALTINDA.</em></h2><p>Motosikletinize ait servis geçmişine plaka veya size özel servis koduyla güvenli şekilde ulaşın.</p></div>
       <form className="tracking-form" onSubmit={(e) => {e.preventDefault(); if(query.trim()) navigate("/takip/" + encodeURIComponent(query.trim()));}}>
-        <label htmlFor="tracking-query">PLAKA / SERVİS KODU</label>
-        <div className="tracking-input"><Search size={18}/><input id="tracking-query" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Örn. 34 ABC 123" required/><button aria-label="Sorgula"><ArrowUpRight/></button></div>
+        <label htmlFor="tracking-query">QR KODU / SERVİS TOKEN</label>
+        <div className="tracking-input"><Search size={18}/><input id="tracking-query" value={query} onChange={e=>setQuery(e.target.value)} placeholder="QR kodundaki servis kodu" required/><button aria-label="Sorgula"><ArrowUpRight/></button></div>
         <small><ShieldCheck size={14}/> Servis bilgileri kontrollü olarak paylaşılır.</small>
       </form>
     </section>
