@@ -38,7 +38,7 @@ function Footer() {
     <div className="footer-top">
       <div className="brand footer-brand"><span className="brand-mark">T<span>·</span>M</span><span className="brand-copy">T-MOTO <b>GARAGE</b><small>EVERY DETAIL MATTERS.</small></span><span className="brand-owner"><small>İŞLETME SAHİBİ</small><strong>MAHMUT BERK DEMİRKALE</strong></span></div>
       <p>Makinenize gösterdiğimiz özen,<br/>yola duyduğumuz saygıdır.</p>
-      <a className="social-link" href="https://instagram.com" target="_blank" rel="noreferrer"><Instagram size={17}/> INSTAGRAM <ArrowUpRight size={14}/></a>
+      <a className="social-link" href="https://www.instagram.com/t_moto_garage" target="_blank" rel="noreferrer"><Instagram size={17}/> INSTAGRAM <ArrowUpRight size={14}/></a>
     </div>
     <div className="footer-bottom"><span>© {new Date().getFullYear()} T-MOTO GARAGE</span><span>BUILT FOR THE RIDE.</span><span>ALL SYSTEMS <i className="status-dot"/></span></div>
   </footer>;
