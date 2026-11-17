@@ -6,6 +6,7 @@ import {
   Wrench, X, Zap
 } from "lucide-react";
 import { supabase, supabaseConfigured } from "./lib/supabase";
+import AdminPanel from "./admin/AdminPanel";
 
 const showcase = [
   { make: "DUCATI", model: "Panigale V4 S", year: "2024", category: "SUPERSPORT", image: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1400&q=85", tag: "PERFORMANCE" },
@@ -185,26 +186,6 @@ function TrackingResult() {
       </article>)}
     </section>
   </main>;
-}
-
-function AdminPanel() {
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  useEffect(() => {
-    if (!supabase) { setError("Supabase yapılandırması eksik."); setLoading(false); return; }
-    let active = true;
-    supabase.auth.getSession().then(({data}) => {
-      if (active) { setSession(data.session); setLoading(false); }
-    });
-    const {data} = supabase.auth.onAuthStateChange((_event, current) => {
-      if (active) setSession(current);
-    });
-    return () => { active = false; data.subscription.unsubscribe(); };
-  }, []);
-  if (loading) return <main className="not-found">YÜKLENİYOR...</main>;
-  if (!session) return <AdminLogin/>;
-  return <main className="admin-page"><div className="admin-card"><p className="eyebrow">T-MOTO GARAGE / CONTROL ROOM</p><h1>YÖNETİM<br/><em>PANELİ.</em></h1><p className="muted">Oturum açıldı: {session.user.email}</p><div className="panel-placeholder"><Wrench/><div><b>Operasyon paneli hazırlanıyor.</b><span>Araç kayıtları ve servis akışları veritabanı kurulumu tamamlandığında burada görünecek.</span></div></div><button className="button button-ghost full-button" onClick={()=>supabase.auth.signOut()}>GÜVENLİ ÇIKIŞ</button></div></main>;
 }
 
 function App() {
