@@ -53,7 +53,7 @@ function Home() {
       <div className="hero-grain"/>
       <div className="hero-content">
         <div className="eyebrow"><span className="eyebrow-line"/> MOTOSİKLET BAKIMI / SÜRÜCÜLER İÇİN</div>
-        <h1>PERFORMANS İÇİN<br/><em>ÜRETİLDİ.</em></h1>
+        <h1>TAMİRİ USTALIK.<br/><em>GÜVENİ İŞİMİZ.</em></h1>
         <p className="hero-sub">Her makinenin bir karakteri var.<br/>Biz onu en iyi halinde tutuyoruz.</p>
         <div className="hero-actions">
           <a className="button button-primary" href="#services">GARAJI KEŞFET <ArrowUpRight size={16}/></a>
