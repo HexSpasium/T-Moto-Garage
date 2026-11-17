@@ -136,6 +136,7 @@ function TrackingResult() {
   const [record, setRecord] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [lightbox, setLightbox] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -174,9 +175,7 @@ function TrackingResult() {
   return <main className="record-page">
     <section className="record-hero">
       <p className="eyebrow">T-MOTO GARAGE / DIGITAL SERVICE HISTORY</p>
-      <h1>{vehicle.make}<br/><em>{vehicle.model}</em></h1>
-      <div className="record-meta"><span>{vehicle.production_year || "—"} MODEL</span><span>PLAKA: {vehicle.plate}</span></div>
-      {(vehicle.images || []).length > 0 && <div className="record-vehicle-gallery">{vehicle.images.map((img,index)=><img key={index} src={img.url} alt={img.caption || (vehicle.make + " " + vehicle.model)} loading="lazy"/>)}</div>}
+      <div className="record-vehicle-summary"><div className="record-vehicle-copy"><h1>{vehicle.make}<br/><em>{vehicle.model}</em></h1><div className="record-meta"><span>{vehicle.production_year || "—"} MODEL</span><span>PLAKA: {vehicle.plate}</span></div></div>{(vehicle.images || []).length > 0 && <button className="record-vehicle-thumb" onClick={() => setLightbox(vehicle.images[0])}><img src={vehicle.images[0].url} alt={vehicle.images[0].caption || (vehicle.make + " " + vehicle.model)}/><span>FOTOĞRAFI BÜYÜT</span></button>}</div>}
     </section>
     <section className="record-list">
       <div className="record-heading"><div><p className="eyebrow">VERIFIED WORKSHOP LOG</p><h2>SERVİS <em>GEÇMİŞİ.</em></h2></div><span>{records.length} KAYIT</span></div>
@@ -185,9 +184,10 @@ function TrackingResult() {
         <div className="record-dates"><span>GİRİŞ <b>{new Date(item.received_at).toLocaleString("tr-TR")}</b></span>{item.delivered_at && <span>TESLİM <b>{new Date(item.delivered_at).toLocaleString("tr-TR")}</b></span>}</div>
         {item.work_summary && <p>{item.work_summary}</p>}
         {(item.events || []).length > 0 && <div className="record-events">{item.events.map((event, index) => <div className="record-event" key={index}><i/><div><b>{event.title}</b><small>{new Date(event.occurred_at).toLocaleString("tr-TR")}</small>{event.description && <p>{event.description}</p>}</div></div>)}</div>}
-        {(item.parts || []).length > 0 && <div className="record-parts"><h3>PARÇA / İŞLEM DETAYLARI</h3>{item.parts.map((part,index)=><div key={index}><span>{part.part_name} <small>· {part.category}</small></span><b>{part.action} × {part.quantity}</b></div>)}</div>}
+        {(item.parts || []).length > 0 && <div className="record-parts"><h3>PARÇA / İŞLEM DETAYLARI</h3>{item.parts.map((part,index)=><div key={index}><span>{part.part_name} <small>· {part.category}</small></span><b>{part.action} × {part.quantity}</b></div>)}</div>}{(item.media || []).length > 0 && <div className="record-service-media"><h3>SERVİS / PARÇA FOTOĞRAFLARI</h3><div>{item.media.map((img,index)=><button key={index} onClick={() => setLightbox(img)}><img src={img.url} alt={img.caption || "Servis fotoğrafı"}/><span>{img.caption || "Görüntüle"}</span></button>)}</div></div>}
       </article>)}
     </section>
+    {lightbox && <div className="record-lightbox" onClick={() => setLightbox(null)}><button className="record-lightbox-close">×</button><img src={lightbox.url} alt={lightbox.caption || "Fotoğraf"}/></div>}
   </main>;
 }
 
@@ -198,6 +198,7 @@ function PlateLookup() {
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState("");
  const [record,setRecord]=useState(null);
+ const [lightbox,setLightbox]=useState(null);
  async function lookup(e){
   e.preventDefault();setBusy(true);setError("");setRecord(null);
   try{
@@ -214,8 +215,8 @@ function PlateLookup() {
  const labels={received:"Servise kabul edildi",inspection:"Arıza tespiti",waiting_approval:"Onay bekleniyor",waiting_parts:"Parça bekleniyor",in_progress:"Onarım devam ediyor",quality_check:"Son kontrol",ready_for_pickup:"Teslime hazır",delivered:"Müşteriye teslim edildi",cancelled:"İşlem iptal edildi"};
  return <main className="plate-lookup-page"><div className="plate-lookup-card"><Link to="/" className="back-link">← ANA SAYFA</Link><p className="eyebrow">T-MOTO GARAGE / PLATE LOOKUP</p><h1>PLAKADAN<br/><em>SERVİS TAKİBİ.</em></h1>
  <form className="plate-lookup-form" onSubmit={lookup}><p>QR kodunuz yanınızda değilse aracınızın plakasını girerek yayınlanmış servis geçmişini görüntüleyebilirsiniz.</p><label>ARAÇ PLAKASI<input value={plate} onChange={e=>setPlate(e.target.value.toLocaleUpperCase("tr"))} placeholder="34 ABC 123" required/></label><button className="button button-primary full-button" disabled={busy}>{busy?"SORGULANIYOR...":"SERVİS GEÇMİŞİNİ GÖR"} <ArrowUpRight size={16}/></button></form>
- {record&&<div className="plate-lookup-result"><div className="plate-result-vehicle"><small>{record.vehicle?.plate}</small><h2>{record.vehicle?.make} {record.vehicle?.model}</h2><span>{record.vehicle?.production_year||"—"} MODEL</span></div>
- <div className="plate-result-gallery">{(record.vehicle?.images||[]).map((img,index)=><img key={index} src={img.url} alt={img.caption || (record.vehicle?.make+" "+record.vehicle?.model)} loading="lazy"/>)}</div><h3>YAYINLANMIŞ SERVİS GEÇMİŞİ</h3>{!(record.records||[]).length?<p>Yayınlanmış servis kaydı bulunmuyor.</p>:(record.records||[]).map(item=><article className="record-card" key={item.service_number}><div className="record-card-top"><span>#{item.service_number}</span><b>{labels[item.status]||item.status}</b></div><div className="record-dates"><span>GİRİŞ <b>{new Date(item.received_at).toLocaleString("tr-TR")}</b></span>{item.delivered_at&&<span>TESLİM <b>{new Date(item.delivered_at).toLocaleString("tr-TR")}</b></span>}</div>{item.work_summary&&<p>{item.work_summary}</p>}{(item.parts||[]).length>0&&<div className="record-parts"><h3>PARÇA / İŞLEM DETAYLARI</h3>{item.parts.map((p,i)=><div key={i}><span>{p.part_name} · {p.category}</span><b>{labels[p.action]||p.action} × {p.quantity}</b></div>)}</div>}</article>)}</div>}
+ {record&&<div className="plate-lookup-result"><div className="plate-result-vehicle"><div><small>{record.vehicle?.plate}</small><h2>{record.vehicle?.make} {record.vehicle?.model}</h2><span>{record.vehicle?.production_year||"—"} MODEL</span></div>{record.vehicle?.images?.[0]&&<button className="record-vehicle-thumb" onClick={()=>setLightbox(record.vehicle.images[0])}><img src={record.vehicle.images[0].url} alt="Araç fotoğrafı"/><span>FOTOĞRAFI BÜYÜT</span></button>}</div><h3>YAYINLANMIŞ SERVİS GEÇMİŞİ</h3>{!(record.records||[]).length?<p>Yayınlanmış servis kaydı bulunmuyor.</p>:(record.records||[]).map(item=><article className="record-card" key={item.service_number}><div className="record-card-top"><span>#{item.service_number}</span><b>{labels[item.status]||item.status}</b></div><div className="record-dates"><span>GİRİŞ <b>{new Date(item.received_at).toLocaleString("tr-TR")}</b></span>{item.delivered_at&&<span>TESLİM <b>{new Date(item.delivered_at).toLocaleString("tr-TR")}</b></span>}</div>{item.work_summary&&<p>{item.work_summary}</p>}{(item.parts||[]).length>0&&<div className="record-parts"><h3>PARÇA / İŞLEM DETAYLARI</h3>{item.parts.map((p,i)=><div key={i}><span>{p.part_name} · {p.category}</span><b>{labels[p.action]||p.action} × {p.quantity}</b></div>)}</div>}{(item.media||[]).length>0&&<div className="record-service-media"><h3>SERVİS / PARÇA FOTOĞRAFLARI</h3><div>{item.media.map((img,i)=><button key={i} onClick={()=>setLightbox(img)}><img src={img.url} alt={img.caption||"Servis fotoğrafı"}/><span>{img.caption||"Görüntüle"}</span></button>)}</div></div>}</article>)}</div>}
+ {lightbox&&<div className="record-lightbox" onClick={()=>setLightbox(null)}><button className="record-lightbox-close">×</button><img src={lightbox.url} alt={lightbox.caption||"Fotoğraf"}/></div>}
  {error&&<div className="form-error">{error}</div>}<div className="plate-lookup-secure"><ShieldCheck size={15}/> YALNIZCA YAYINLANMIŞ SERVİS BİLGİLERİ GÖSTERİLİR</div></div></main>;
 }
 
