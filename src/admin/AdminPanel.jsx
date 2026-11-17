@@ -4,7 +4,7 @@ import KAREKODCode from "qrcode";
 import {supabase} from "../lib/supabase";
 
 const BUCKET="tmoto-private-media";
-const STATUSES=[["received","Servise kabul"],["inspection","Arıza tespiti"],["waiting_approval","Onay bekliyor"],["waiting_parts","Parça bekliyor"],["in_progress","İşlemde"],["quality_check","Son kontrol"],["ready_for_pickup","Teslime hazır"],["delivered","Teslim edildi"],["cancelled","İptal"]];
+const STATUSES=[["received","Servise kabul edildi"],["inspection","Arıza tespiti"],["waiting_approval","Onay bekliyor"],["waiting_parts","Parça bekleniyor"],["in_progress","Onarım sürüyor"],["quality_check","Son kontrol"],["ready_for_pickup","Teslime hazır"],["delivered","Teslim edildi"],["cancelled","İptal edildi"]];
 const ACTIONS=[["replaced","Değiştirildi"],["installed","Takıldı"],["repaired","Onarıldı"],["inspected","Kontrol edildi"],["maintained","Bakımı yapıldı"]];
 const statusLabel=s=>STATUSES.find(x=>x[0]===s)?.[1]||s;
 const dateLabel=s=>s?new Date(s).toLocaleDateString("tr-TR"):"—";
