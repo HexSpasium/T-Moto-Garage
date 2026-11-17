@@ -39,3 +39,26 @@
 .tm-private-note svg{flex:none;color:#f26a21}
 .tm-entry-modal .tm-field input[type="datetime-local"]{color-scheme:dark}
 @media(max-width:650px){.tm-entry-modal{padding:15px}.tm-part-bottom{align-items:flex-start;flex-direction:column}.tm-subsection-head{align-items:flex-start;flex-direction:column}.tm-media-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Verified plate lookup */
+.plate-lookup-page{min-height:72vh;padding:90px 20px 110px;background:#0b0b0b;display:grid;place-items:center}
+.plate-lookup-card{width:min(100%,620px);padding:clamp(22px,5vw,48px);border:1px solid #38332f;background:linear-gradient(145deg,#171513,#0d0d0d);box-shadow:0 24px 80px #0008}
+.plate-lookup-card h1{font:900 clamp(40px,8vw,72px)/.9 "Barlow Condensed",sans-serif;letter-spacing:-.04em;margin:22px 0}
+.plate-lookup-card h1 em{color:#ed6b2b;font-style:normal}
+.plate-lookup-form{display:grid;gap:16px;margin-top:28px}
+.plate-lookup-form>p{color:#aaa;font-size:13px;line-height:1.8}
+.plate-lookup-form>p svg{vertical-align:middle;color:#ed6b2b}
+.plate-lookup-form>label{display:grid;gap:8px;color:#b9b4af;font-size:10px;letter-spacing:.1em}
+.plate-lookup-form input{width:100%;min-height:48px;padding:0 13px;background:#090909;border:1px solid #3b3937;color:#fff;outline:none}
+.plate-lookup-form input:focus{border-color:#ed6b2b}
+.plate-lookup-secure{display:flex;align-items:center;gap:8px;margin-top:28px;padding-top:16px;border-top:1px solid #302d2a;color:#8c8884;font-size:9px;letter-spacing:.08em}
+.plate-lookup-secure svg{color:#ed6b2b}
+.plate-lookup-message{margin-top:14px;color:#b8b1a8;font-size:11px;line-height:1.6}
+.plate-lookup-result{margin-top:28px}
+.plate-result-vehicle{padding:18px;background:#0a0a0a;border:1px solid #37322e;margin-bottom:24px}
+.plate-result-vehicle small{font-weight:800;color:#ed6b2b;letter-spacing:.12em}
+.plate-result-vehicle h2{margin:8px 0;font:800 25px "Barlow Condensed",sans-serif}
+.plate-result-vehicle span{color:#8e8984;font-size:9px}
+.plate-lookup-result>h3{font:800 12px "Barlow Condensed",sans-serif;letter-spacing:.1em;color:#d2cbc4;margin-bottom:12px}
+.plate-lookup-result .record-card{margin-bottom:12px}
+@media(max-width:600px){.plate-lookup-page{padding:48px 14px 70px}.plate-lookup-card{padding:22px 17px}}
