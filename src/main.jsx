@@ -6,7 +6,7 @@ import "./styles.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/T-Moto-Garage">
       <App />
     </BrowserRouter>
   </React.StrictMode>
