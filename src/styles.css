@@ -111,18 +111,18 @@
 /* Performance, accessibility and consistent premium-gold polish */
 img{max-width:100%}img[loading=lazy]{content-visibility:auto}.button:focus-visible,a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #E6C65A;outline-offset:3px}.tm-upload-button{background:#17150F;border-color:#8A7027;color:#D4AF37}.tm-media-thumb>button{border-color:#8A7027;background:#14130F;color:#D4AF37}
 
-/* Hero sloganı: görseldeki kişinin yüzünü kapatmayacak ölçülü tipografi */
+/* Hero sloganı: kişinin yüzünü açıkta bırakacak kompakt tipografi */
 .hero h1.hero-title{
-  font-size:clamp(54px,6.2vw,96px);
-  letter-spacing:-1.5px;
-  line-height:.88;
-  max-width:900px;
+  font-size:clamp(48px,4.6vw,74px);
+  letter-spacing:-1px;
+  line-height:.9;
+  max-width:690px;
 }
 @media(max-width:640px){
   .hero h1.hero-title{
-    font-size:clamp(48px,11.5vw,72px);
-    letter-spacing:-1px;
-    line-height:.9;
+    font-size:clamp(42px,10.5vw,62px);
+    letter-spacing:-.7px;
+    line-height:.92;
     max-width:100%;
   }
 }
