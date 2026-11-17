@@ -145,7 +145,9 @@ function TrackingResult() {
         setLoading(false);
         return;
       }
-      const { data, error: rpcError } = await supabase.rpc("get_public_service_history", { p_qr_token: token });
+      const { data: response, error: lookupError } = await supabase.functions.invoke("plate-service-lookup", { body: { qr_token: token } });
+      const data = response?.history;
+      const rpcError = lookupError;
       if (!active) return;
       if (rpcError) setError("Servis kaydı şu anda görüntülenemiyor.");
       else if (!data) setError("Bu QR koduna ait yayınlanmış servis kaydı bulunamadı.");
@@ -174,6 +176,7 @@ function TrackingResult() {
       <p className="eyebrow">T-MOTO GARAGE / DIGITAL SERVICE HISTORY</p>
       <h1>{vehicle.make}<br/><em>{vehicle.model}</em></h1>
       <div className="record-meta"><span>{vehicle.production_year || "—"} MODEL</span><span>PLAKA: {vehicle.plate}</span></div>
+      {(vehicle.images || []).length > 0 && <div className="record-vehicle-gallery">{vehicle.images.map((img,index)=><img key={index} src={img.url} alt={img.caption || (vehicle.make + " " + vehicle.model)} loading="lazy"/>)}</div>}
     </section>
     <section className="record-list">
       <div className="record-heading"><div><p className="eyebrow">VERIFIED WORKSHOP LOG</p><h2>SERVİS <em>GEÇMİŞİ.</em></h2></div><span>{records.length} KAYIT</span></div>
@@ -211,7 +214,8 @@ function PlateLookup() {
  const labels={received:"Servise kabul edildi",inspection:"Arıza tespiti",waiting_approval:"Onay bekleniyor",waiting_parts:"Parça bekleniyor",in_progress:"Onarım devam ediyor",quality_check:"Son kontrol",ready_for_pickup:"Teslime hazır",delivered:"Müşteriye teslim edildi",cancelled:"İşlem iptal edildi"};
  return <main className="plate-lookup-page"><div className="plate-lookup-card"><Link to="/" className="back-link">← ANA SAYFA</Link><p className="eyebrow">T-MOTO GARAGE / PLATE LOOKUP</p><h1>PLAKADAN<br/><em>SERVİS TAKİBİ.</em></h1>
  <form className="plate-lookup-form" onSubmit={lookup}><p>QR kodunuz yanınızda değilse aracınızın plakasını girerek yayınlanmış servis geçmişini görüntüleyebilirsiniz.</p><label>ARAÇ PLAKASI<input value={plate} onChange={e=>setPlate(e.target.value.toLocaleUpperCase("tr"))} placeholder="34 ABC 123" required/></label><button className="button button-primary full-button" disabled={busy}>{busy?"SORGULANIYOR...":"SERVİS GEÇMİŞİNİ GÖR"} <ArrowUpRight size={16}/></button></form>
- {record&&<div className="plate-lookup-result"><div className="plate-result-vehicle"><small>{record.vehicle?.plate}</small><h2>{record.vehicle?.make} {record.vehicle?.model}</h2><span>{record.vehicle?.production_year||"—"} MODEL</span></div><h3>YAYINLANMIŞ SERVİS GEÇMİŞİ</h3>{!(record.records||[]).length?<p>Yayınlanmış servis kaydı bulunmuyor.</p>:(record.records||[]).map(item=><article className="record-card" key={item.service_number}><div className="record-card-top"><span>#{item.service_number}</span><b>{labels[item.status]||item.status}</b></div><div className="record-dates"><span>GİRİŞ <b>{new Date(item.received_at).toLocaleString("tr-TR")}</b></span>{item.delivered_at&&<span>TESLİM <b>{new Date(item.delivered_at).toLocaleString("tr-TR")}</b></span>}</div>{item.work_summary&&<p>{item.work_summary}</p>}{(item.parts||[]).length>0&&<div className="record-parts"><h3>PARÇA / İŞLEM DETAYLARI</h3>{item.parts.map((p,i)=><div key={i}><span>{p.part_name} · {p.category}</span><b>{labels[p.action]||p.action} × {p.quantity}</b></div>)}</div>}</article>)}</div>}
+ {record&&<div className="plate-lookup-result"><div className="plate-result-vehicle"><small>{record.vehicle?.plate}</small><h2>{record.vehicle?.make} {record.vehicle?.model}</h2><span>{record.vehicle?.production_year||"—"} MODEL</span></div>
+ <div className="plate-result-gallery">{(record.vehicle?.images||[]).map((img,index)=><img key={index} src={img.url} alt={img.caption || (record.vehicle?.make+" "+record.vehicle?.model)} loading="lazy"/>)}</div><h3>YAYINLANMIŞ SERVİS GEÇMİŞİ</h3>{!(record.records||[]).length?<p>Yayınlanmış servis kaydı bulunmuyor.</p>:(record.records||[]).map(item=><article className="record-card" key={item.service_number}><div className="record-card-top"><span>#{item.service_number}</span><b>{labels[item.status]||item.status}</b></div><div className="record-dates"><span>GİRİŞ <b>{new Date(item.received_at).toLocaleString("tr-TR")}</b></span>{item.delivered_at&&<span>TESLİM <b>{new Date(item.delivered_at).toLocaleString("tr-TR")}</b></span>}</div>{item.work_summary&&<p>{item.work_summary}</p>}{(item.parts||[]).length>0&&<div className="record-parts"><h3>PARÇA / İŞLEM DETAYLARI</h3>{item.parts.map((p,i)=><div key={i}><span>{p.part_name} · {p.category}</span><b>{labels[p.action]||p.action} × {p.quantity}</b></div>)}</div>}</article>)}</div>}
  {error&&<div className="form-error">{error}</div>}<div className="plate-lookup-secure"><ShieldCheck size={15}/> YALNIZCA YAYINLANMIŞ SERVİS BİLGİLERİ GÖSTERİLİR</div></div></main>;
 }
 
