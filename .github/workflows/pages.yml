@@ -1,4 +1,5 @@
 name: Deploy T-Moto Garage to GitHub Pages
+# Build and publish the Vite dist output only; do not use the legacy Jekyll branch publisher.
 
 on:
   push:
