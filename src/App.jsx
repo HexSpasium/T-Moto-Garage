@@ -94,7 +94,7 @@ function Home() {
       <form className="tracking-form" onSubmit={(e) => {e.preventDefault(); if(query.trim()) { const value=query.trim(); const isQr=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value); navigate(isQr?"/takip/"+encodeURIComponent(value):"/plaka-sorgula?plate="+encodeURIComponent(value)); }}}>
         <label htmlFor="tracking-query">PLAKA / QR KODU</label>
         <div className="tracking-input"><Search size={18}/><input id="tracking-query" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Örn. 34 ABC 123 veya QR kodu" required/><button aria-label="Sorgula"><ArrowUpRight/></button></div>
-        <small><ShieldCheck size={14}/> Plaka sorgusunda kayıtlı telefonla SMS doğrulaması gerekir.</small>
+        <small><ShieldCheck size={14}/> Plaka sorgusunda yalnızca yayınlanmış servis bilgileri gösterilir.</small>
       </form>
     </section>
   </>;
@@ -192,30 +192,27 @@ function TrackingResult() {
 function PlateLookup() {
  const [params]=useSearchParams();
  const [plate,setPlate]=useState(params.get("plate")||"");
- const [phone,setPhone]=useState("");
- const [otp,setOtp]=useState("");
- const [stage,setStage]=useState("details");
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState("");
- const [message,setMessage]=useState("");
  const [record,setRecord]=useState(null);
- function normalizePhone(value){let d=value.replace(/\\D/g,"");if(d.startsWith("00"))d=d.slice(2);if(d.startsWith("0"))d="90"+d.slice(1);if(d.length===10)d="90"+d;return "+"+d;}
- async function sendCode(e){
-  e.preventDefault();setBusy(true);setError("");setMessage("");
-  try{if(!supabase)throw new Error("Sorgulama servisi hazır değil.");const normalized=normalizePhone(phone);if(!/^\\+90[0-9]{10}$/.test(normalized))throw new Error("Türkiye için geçerli bir cep telefonu numarası girin.");const {error:e}=await supabase.auth.signInWithOtp({phone:normalized});if(e)throw e;setPhone(normalized);setStage("verify");setMessage("SMS kodu gönderme isteği alındı. Kodun gelmesi birkaç dakika sürebilir.");}
-  catch(e){setError(e.message||"Kod gönderilemedi.");}finally{setBusy(false);}
- }
- async function verifyAndLookup(e){
-  e.preventDefault();setBusy(true);setError("");setMessage("");
-  try{const {data,error:e}=await supabase.auth.verifyOtp({phone,token:otp.trim(),type:"sms"});if(e)throw e;if(!data.session)throw new Error("Telefon doğrulanamadı.");const {data:r,error:x}=await supabase.functions.invoke("plate-service-lookup",{body:{plate}});if(x)throw new Error("Plaka ve kayıtlı telefon eşleşmedi veya servis kaydı bulunamadı.");if(!r?.history)throw new Error("Yayınlanmış servis kaydı bulunamadı.");setRecord(r.history);setStage("result");}
-  catch(e){setError(e.message||"Sorgulama başarısız oldu.");}finally{setBusy(false);}
+ async function lookup(e){
+  e.preventDefault();setBusy(true);setError("");setRecord(null);
+  try{
+   if(!supabase)throw new Error("Sorgulama servisi hazır değil.");
+   const normalized=plate.trim().toLocaleUpperCase("tr-TR");
+   if(normalized.replace(/[^A-Z0-9]/g,"").length<5)throw new Error("Geçerli bir plaka girin.");
+   const {data:r,error:x}=await supabase.functions.invoke("plate-service-lookup",{body:{plate:normalized}});
+   if(x)throw new Error("Bu plakaya ait yayınlanmış servis kaydı bulunamadı.");
+   if(!r?.history)throw new Error("Bu plakaya ait yayınlanmış servis kaydı bulunamadı.");
+   setRecord(r.history);
+  }catch(e){setError(e.message||"Sorgulama başarısız oldu.");}
+  finally{setBusy(false);}
  }
  const labels={received:"Servise kabul edildi",inspection:"Arıza tespiti",waiting_approval:"Onay bekleniyor",waiting_parts:"Parça bekleniyor",in_progress:"Onarım devam ediyor",quality_check:"Son kontrol",ready_for_pickup:"Teslime hazır",delivered:"Müşteriye teslim edildi",cancelled:"İşlem iptal edildi"};
- return <main className="plate-lookup-page"><div className="plate-lookup-card"><Link to="/" className="back-link">← ANA SAYFA</Link><p className="eyebrow">T-MOTO GARAGE / SECURE PLATE LOOKUP</p><h1>PLAKADAN<br/><em>SERVİS TAKİBİ.</em></h1>
- {stage==="details"&&<form className="plate-lookup-form" onSubmit={sendCode}><p>QR kodunuz yanınızda değilse plakanızı ve servis kaydında bulunan telefon numaranızı girin. Telefonunuza tek kullanımlık doğrulama kodu gönderilir.</p><label>ARAÇ PLAKASI<input value={plate} onChange={e=>setPlate(e.target.value.toLocaleUpperCase("tr"))} placeholder="34 ABC 123" required/></label><label>KAYITLI CEP TELEFONU<input type="tel" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="05XX XXX XX XX" autoComplete="tel" required/></label><button className="button button-primary full-button" disabled={busy}>{busy?"GÖNDERİLİYOR...":"SMS DOĞRULAMA KODU GÖNDER"} <ArrowUpRight size={16}/></button></form>}
- {stage==="verify"&&<form className="plate-lookup-form" onSubmit={verifyAndLookup}><p><ShieldCheck size={16}/> Telefonunuza gönderilen 6 haneli kodu girin.</p><label>SMS DOĞRULAMA KODU<input inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={otp} onChange={e=>setOtp(e.target.value.replace(/\\D/g,"").slice(0,6))} placeholder="••••••" required/></label><button className="button button-primary full-button" disabled={busy||otp.length!==6}>{busy?"DOĞRULANIYOR...":"DOĞRULA VE SERVİSİ GÖR"} <ArrowUpRight size={16}/></button><button type="button" className="text-link" onClick={()=>{setStage("details");setOtp("");}}>PLAKA / TELEFON BİLGİSİNİ DEĞİŞTİR</button></form>}
- {stage==="result"&&record&&<div className="plate-lookup-result"><div className="plate-result-vehicle"><small>{record.vehicle?.plate}</small><h2>{record.vehicle?.make} {record.vehicle?.model}</h2><span>{record.vehicle?.production_year||"—"} MODEL</span></div><h3>YAYINLANMIŞ SERVİS GEÇMİŞİ</h3>{!(record.records||[]).length?<p>Yayınlanmış servis kaydı bulunmuyor.</p>:(record.records||[]).map(item=><article className="record-card" key={item.service_number}><div className="record-card-top"><span>#{item.service_number}</span><b>{labels[item.status]||item.status}</b></div><div className="record-dates"><span>GİRİŞ <b>{new Date(item.received_at).toLocaleString("tr-TR")}</b></span>{item.delivered_at&&<span>TESLİM <b>{new Date(item.delivered_at).toLocaleString("tr-TR")}</b></span>}</div>{item.work_summary&&<p>{item.work_summary}</p>}{(item.parts||[]).length>0&&<div className="record-parts"><h3>PARÇA / İŞLEM DETAYLARI</h3>{item.parts.map((p,i)=><div key={i}><span>{p.part_name} · {p.category}</span><b>{labels[p.action]||p.action} × {p.quantity}</b></div>)}</div>}</article>)}</div>}
- {error&&<div className="form-error">{error}</div>}{message&&<div className="plate-lookup-message">{message}</div>}<div className="plate-lookup-secure"><ShieldCheck size={15}/> KİŞİSEL SERVİS BİLGİLERİ SMS İLE KORUNUR</div></div></main>;
+ return <main className="plate-lookup-page"><div className="plate-lookup-card"><Link to="/" className="back-link">← ANA SAYFA</Link><p className="eyebrow">T-MOTO GARAGE / PLATE LOOKUP</p><h1>PLAKADAN<br/><em>SERVİS TAKİBİ.</em></h1>
+ <form className="plate-lookup-form" onSubmit={lookup}><p>QR kodunuz yanınızda değilse aracınızın plakasını girerek yayınlanmış servis geçmişini görüntüleyebilirsiniz.</p><label>ARAÇ PLAKASI<input value={plate} onChange={e=>setPlate(e.target.value.toLocaleUpperCase("tr"))} placeholder="34 ABC 123" required/></label><button className="button button-primary full-button" disabled={busy}>{busy?"SORGULANIYOR...":"SERVİS GEÇMİŞİNİ GÖR"} <ArrowUpRight size={16}/></button></form>
+ {record&&<div className="plate-lookup-result"><div className="plate-result-vehicle"><small>{record.vehicle?.plate}</small><h2>{record.vehicle?.make} {record.vehicle?.model}</h2><span>{record.vehicle?.production_year||"—"} MODEL</span></div><h3>YAYINLANMIŞ SERVİS GEÇMİŞİ</h3>{!(record.records||[]).length?<p>Yayınlanmış servis kaydı bulunmuyor.</p>:(record.records||[]).map(item=><article className="record-card" key={item.service_number}><div className="record-card-top"><span>#{item.service_number}</span><b>{labels[item.status]||item.status}</b></div><div className="record-dates"><span>GİRİŞ <b>{new Date(item.received_at).toLocaleString("tr-TR")}</b></span>{item.delivered_at&&<span>TESLİM <b>{new Date(item.delivered_at).toLocaleString("tr-TR")}</b></span>}</div>{item.work_summary&&<p>{item.work_summary}</p>}{(item.parts||[]).length>0&&<div className="record-parts"><h3>PARÇA / İŞLEM DETAYLARI</h3>{item.parts.map((p,i)=><div key={i}><span>{p.part_name} · {p.category}</span><b>{labels[p.action]||p.action} × {p.quantity}</b></div>)}</div>}</article>)}</div>}
+ {error&&<div className="form-error">{error}</div>}<div className="plate-lookup-secure"><ShieldCheck size={15}/> YALNIZCA YAYINLANMIŞ SERVİS BİLGİLERİ GÖSTERİLİR</div></div></main>;
 }
 
 function App() {
