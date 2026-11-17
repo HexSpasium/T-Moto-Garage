@@ -67,10 +67,24 @@ Deno.serve(async (req: Request) => {
       return { url: data.signedUrl, caption: item.caption || null };
     }));
 
-    history.vehicle = {
-      ...history.vehicle,
-      images: images.filter(Boolean),
-    };
+    history.vehicle = { ...history.vehicle, images: images.filter(Boolean) };
+    const { data: serviceRows } = await admin.from("service_records").select("id, service_number").eq("vehicle_id", vehicle.id).eq("is_published", true);
+    const byService = new Map<string, any[]>();
+    const serviceIds = (serviceRows || []).map((row: any) => row.id);
+    if (serviceIds.length) {
+      const { data: serviceMedia } = await admin.from("service_media").select("service_record_id, storage_path, caption").in("service_record_id", serviceIds).eq("is_public", true).order("created_at", { ascending: true });
+      for (const item of serviceMedia || []) {
+        const { data, error } = await admin.storage.from("tmoto-private-media").createSignedUrl(item.storage_path, 3600);
+        if (error || !data?.signedUrl) continue;
+        const list = byService.get(item.service_record_id) || [];
+        list.push({ url: data.signedUrl, caption: item.caption || null });
+        byService.set(item.service_record_id, list);
+      }
+    }
+    for (const record of history.records || []) {
+      const row = (serviceRows || []).find((item: any) => item.service_number === record.service_number);
+      record.media = row ? (byService.get(row.id) || []) : [];
+    }
     return json({ history });
   } catch (error) {
     console.error("Public vehicle lookup failed", error);
