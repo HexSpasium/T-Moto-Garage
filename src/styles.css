@@ -107,3 +107,26 @@
 .ticker{background:#D4AF37!important;color:#080808!important}
 .nav>a:hover,.nav-admin svg,.eyebrow,.eyebrow-line{color:#D4AF37}
 .hero-grain{background:linear-gradient(110deg,transparent 55%,#D4AF3708 100%)}
+
+
+/* Owner identity and business profile */
+.brand-owner{display:flex;flex-direction:column;gap:4px;margin-left:10px;padding-left:16px;border-left:1px solid #D4AF3755;white-space:nowrap}
+.brand-owner small{font-size:7px;letter-spacing:1.7px;color:#D4AF37;font-weight:800}
+.brand-owner strong{font-family:"Barlow Condensed",sans-serif;font-size:13px;letter-spacing:1.1px;color:#F5F3EC;font-weight:700}
+.footer-brand .brand-owner{margin-left:14px}
+.business-about{padding-top:95px;padding-bottom:110px;border-top:1px solid #ffffff12}
+.business-about-heading{max-width:760px;margin-bottom:48px}
+.business-about-heading h2{font-family:"Barlow Condensed",sans-serif;font-size:clamp(54px,7vw,88px);font-weight:900;line-height:.86;letter-spacing:-1.8px;margin:0 0 20px}
+.business-about-heading h2 em{font-style:normal;color:#D4AF37}
+.business-about-heading>p:last-child{color:#b9b7b0;font-size:14px;line-height:1.8}
+.business-about-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:70px;border-top:1px solid #ffffff20;padding-top:30px}
+.business-kicker{font-size:9px;letter-spacing:2px;color:#D4AF37;font-weight:800}
+.business-services ul{list-style:none;padding:0;margin:22px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:0 30px}
+.business-services li{padding:13px 0;border-bottom:1px solid #ffffff14;color:#eeeae1;font-size:14px}
+.business-services li:before{content:"✦";color:#D4AF37;font-size:10px;margin-right:12px}
+.business-contact{padding:0 0 0 32px;border-left:1px solid #ffffff20}
+.business-contact h3{font-family:"Barlow Condensed",sans-serif;font-size:25px;letter-spacing:.7px;color:#F5F3EC;margin:24px 0 14px}
+.business-phone{display:inline-flex;align-items:center;gap:9px;color:#D4AF37;font-size:22px;font-weight:800;letter-spacing:.5px;margin-bottom:15px}
+.business-contact p{color:#c6c3bb;font-size:14px;line-height:1.9;margin:12px 0 24px}
+@media(max-width:760px){.brand-owner{margin-left:5px;padding-left:9px}.brand-owner strong{font-size:10px;letter-spacing:.5px}.brand-owner small{font-size:6px;letter-spacing:1px}.brand-copy{font-size:15px}.business-about{padding:72px 7%}.business-about-grid{grid-template-columns:1fr;gap:35px}.business-contact{padding:25px 0 0;border-left:0;border-top:1px solid #ffffff20}.business-services ul{grid-template-columns:1fr 1fr;gap:0 14px}.business-services li{font-size:12px}}
+@media(max-width:390px){.brand-owner{display:none}}
