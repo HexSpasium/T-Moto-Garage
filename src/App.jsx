@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link, Route, Routes, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, Route, Routes, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowDownRight, ArrowRight, ArrowUpRight, Bike, Check, ChevronRight,
   CircleHelp, Clock3, Instagram, KeyRound, Menu, Search, ShieldCheck,
@@ -131,19 +131,76 @@ function AdminLogin() {
 }
 
 function TrackingResult() {
-  const { token } = useMemo(() => ({ token: decodeURIComponent(window.location.pathname.split("/").pop() || "") }), []);
-  return <main className="not-found"><div className="not-found-icon"><CircleHelp size={28}/></div><p className="eyebrow">DIGITAL SERVICE RECORD</p><h1>KAYIT<br/><em>DOĞRULANAMADI.</em></h1><p>Bu servis koduna ait yayınlanmış bir kayıt bulunamadı. Kodunuzu kontrol ederek yeniden deneyin.</p><Link className="button button-primary" to="/">ANA SAYFAYA DÖN <ArrowRight size={16}/></Link></main>;
+  const { token } = useParams();
+  const [record, setRecord] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    async function load() {
+      if (!supabase || !token) {
+        setError("Servis kaydı bağlantısı henüz hazır değil.");
+        setLoading(false);
+        return;
+      }
+      const { data, error: rpcError } = await supabase.rpc("get_public_service_history", { p_qr_token: token });
+      if (!active) return;
+      if (rpcError) setError("Servis kaydı şu anda görüntülenemiyor.");
+      else if (!data) setError("Bu QR koduna ait yayınlanmış servis kaydı bulunamadı.");
+      else setRecord(data);
+      setLoading(false);
+    }
+    load();
+    return () => { active = false; };
+  }, [token]);
+
+  const labels = {
+    received: "Servise kabul edildi", inspection: "Arıza tespiti",
+    waiting_approval: "Onay bekleniyor", waiting_parts: "Parça bekleniyor",
+    in_progress: "Onarım devam ediyor", quality_check: "Son kontrol",
+    ready_for_pickup: "Teslime hazır", delivered: "Müşteriye teslim edildi",
+    cancelled: "İşlem iptal edildi"
+  };
+
+  if (loading) return <main className="not-found"><p className="eyebrow">DIGITAL SERVICE RECORD</p><h1>KAYIT<br/><em>YÜKLENİYOR.</em></h1></main>;
+  if (error) return <main className="not-found"><div className="not-found-icon"><CircleHelp size={28}/></div><p className="eyebrow">DIGITAL SERVICE RECORD</p><h1>KAYIT<br/><em>BULUNAMADI.</em></h1><p>{error}</p><Link className="button button-primary" to="/">ANA SAYFAYA DÖN <ArrowRight size={16}/></Link></main>;
+
+  const vehicle = record.vehicle || {};
+  const records = record.records || [];
+  return <main className="record-page">
+    <section className="record-hero">
+      <p className="eyebrow">T-MOTO GARAGE / DIGITAL SERVICE HISTORY</p>
+      <h1>{vehicle.make}<br/><em>{vehicle.model}</em></h1>
+      <div className="record-meta"><span>{vehicle.production_year || "—"} MODEL</span><span>PLAKA: {vehicle.plate}</span></div>
+    </section>
+    <section className="record-list">
+      <div className="record-heading"><div><p className="eyebrow">VERIFIED WORKSHOP LOG</p><h2>SERVİS <em>GEÇMİŞİ.</em></h2></div><span>{records.length} KAYIT</span></div>
+      {records.length === 0 ? <p className="record-empty">Bu motosiklet için henüz yayınlanmış servis kaydı bulunmuyor.</p> : records.map((item) => <article className="record-card" key={item.service_number}>
+        <div className="record-card-top"><span>#{item.service_number}</span><b>{labels[item.status] || item.status}</b></div>
+        <div className="record-dates"><span>GİRİŞ <b>{new Date(item.received_at).toLocaleString("tr-TR")}</b></span>{item.delivered_at && <span>TESLİM <b>{new Date(item.delivered_at).toLocaleString("tr-TR")}</b></span>}</div>
+        {item.work_summary && <p>{item.work_summary}</p>}
+        {(item.events || []).length > 0 && <div className="record-events">{item.events.map((event, index) => <div className="record-event" key={index}><i/><div><b>{event.title}</b><small>{new Date(event.occurred_at).toLocaleString("tr-TR")}</small>{event.description && <p>{event.description}</p>}</div></div>)}</div>}
+        {(item.parts || []).length > 0 && <div className="record-parts"><h3>PARÇA / İŞLEM DETAYLARI</h3>{item.parts.map((part,index)=><div key={index}><span>{part.part_name} <small>· {part.category}</small></span><b>{part.action} × {part.quantity}</b></div>)}</div>}
+      </article>)}
+    </section>
+  </main>;
 }
 
 function AdminPanel() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  useMemo(() => {
-    if (!supabase) { setLoading(false); setError("Supabase yapılandırması eksik."); return; }
-    supabase.auth.getSession().then(({data}) => { setSession(data.session); setLoading(false); });
-    const {data} = supabase.auth.onAuthStateChange((_event, current) => setSession(current));
-    return () => data.subscription.unsubscribe();
+  useEffect(() => {
+    if (!supabase) { setError("Supabase yapılandırması eksik."); setLoading(false); return; }
+    let active = true;
+    supabase.auth.getSession().then(({data}) => {
+      if (active) { setSession(data.session); setLoading(false); }
+    });
+    const {data} = supabase.auth.onAuthStateChange((_event, current) => {
+      if (active) setSession(current);
+    });
+    return () => { active = false; data.subscription.unsubscribe(); };
   }, []);
   if (loading) return <main className="not-found">YÜKLENİYOR...</main>;
   if (!session) return <AdminLogin/>;
