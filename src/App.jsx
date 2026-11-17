@@ -19,7 +19,7 @@ function Header() {
   return <header className="header">
     <Link to="/" className="brand" onClick={() => setOpen(false)}>
       <span className="brand-mark">T<span>·</span>M</span>
-      <span className="brand-copy">T-MOTO <b>GARAGE</b><small>PERFORMANCE / SERVICE / TRUST</small></span>
+      <span className="brand-copy">T-MOTO <b>GARAGE</b><small>PERFORMANCE / SERVICE / TRUST</small></span><span className="brand-owner"><small>İŞLETME SAHİBİ</small><strong>MAHMUT BERK DEMİRKALE</strong></span>
     </Link>
     <button className="mobile-menu" onClick={() => setOpen(!open)} aria-label="Menüyü aç">
       {open ? <X /> : <Menu />}
@@ -36,7 +36,7 @@ function Header() {
 function Footer() {
   return <footer className="footer">
     <div className="footer-top">
-      <div className="brand footer-brand"><span className="brand-mark">T<span>·</span>M</span><span className="brand-copy">T-MOTO <b>GARAGE</b><small>EVERY DETAIL MATTERS.</small></span></div>
+      <div className="brand footer-brand"><span className="brand-mark">T<span>·</span>M</span><span className="brand-copy">T-MOTO <b>GARAGE</b><small>EVERY DETAIL MATTERS.</small></span><span className="brand-owner"><small>İŞLETME SAHİBİ</small><strong>MAHMUT BERK DEMİRKALE</strong></span></div>
       <p>Makinenize gösterdiğimiz özen,<br/>yola duyduğumuz saygıdır.</p>
       <a className="social-link" href="https://instagram.com" target="_blank" rel="noreferrer"><Instagram size={17}/> INSTAGRAM <ArrowUpRight size={14}/></a>
     </div>
@@ -71,7 +71,15 @@ function Home() {
     <section className="section intro" id="workshop">
       <div className="section-index">01 / THE GARAGE</div>
       <div className="intro-copy"><p className="eyebrow">MORE THAN A WORKSHOP</p><h2>MAKİNENİZİN<br/><em>RİTMİNİ</em> BİLİRİZ.</h2></div>
-      <div className="intro-note"><p>Bakım ve onarımı bir işlem değil, bir sorumluluk olarak görüyoruz. Her müdahale kayıt altında. Her detay şeffaf.</p><a className="text-link" href="#services">YAKLAŞIMIMIZ <ArrowUpRight size={15}/></a></div>
+      <div className="intro-note"><p>Bakım ve onarımı bir işlem değil, bir sorumluluk olarak görüyoruz. Her müdahale kayıt altında. Her detay şeffaf.</p><a className="text-link" href="#about">HAKKIMIZDA <ArrowUpRight size={15}/></a></div>
+    </section>
+
+    <section className="section business-about" id="about">
+      <div className="business-about-heading"><p className="eyebrow">T-MOTO GARAGE / ABOUT & CONTACT</p><h2>GÜVENİLİR<br/><em>MOTOSİKLET SERVİSİ.</em></h2><p>Mahmut Berk DEMİRKALE yönetiminde; bakım, onarım ve servis hizmetleri.</p></div>
+      <div className="business-about-grid">
+        <div className="business-services"><span className="business-kicker">01 / HİZMETLER</span><ul><li>Fren servisi ve tamiri</li><li>Karbüratör temizliği</li><li>Teslimat</li><li>Elektrik tamiri</li><li>Motor tamiri</li><li>Yağ değişimi</li><li>Direksiyon ve süspansiyon tamiri</li><li>Lastikler</li><li>Tekerlek ayarı</li></ul></div>
+        <div className="business-contact"><span className="business-kicker">02 / İLETİŞİM & KONUM</span><h3>MAHMUT BERK DEMİRKALE</h3><a className="business-phone" href="tel:+905309743247">0530 974 32 47 <ArrowUpRight size={15}/></a><p>Turgutreis, Cengiz Topel Cd. NO:79,<br/>33000 Akdeniz / Mersin</p><a className="button button-primary" href="https://www.google.com/maps?udm&fvr=1&pvq=Cg0vZy8xMXo4c2N0Y3cxIhMKDXQtbW90byBnYXJhZ2UQAhgD&lqi=Cg10LW1vdG8gZ2FyYWdlSOHe8oWjvoCACFobEAAQARACGAAYARgCIg10IG1vdG8gZ2FyYWdlkgEWbW90b3JjeWNsZV9yZXBhaXJfc2hvcA&vet=10CAAQoqAOahcKEwjg5N31zI-YAxUAAAAAHQAAAAAQDQ..i&cs=0&um=1&ie=UTF-8&fb=1&gl=tr&sa=X&ftid=0x1527f39006624055:0x33fbef0c05dbc332" target="_blank" rel="noreferrer">HARİTADA YOL TARİFİ <ArrowUpRight size={15}/></a></div>
+      </div>
     </section>
 
     <section className="showcase-section" id="services">
