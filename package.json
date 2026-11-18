@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cap:sync": "npm run build && cap sync",
+    "cap:android": "cap open android",
+    "cap:ios": "cap open ios"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.57.4",
