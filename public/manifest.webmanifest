@@ -1,0 +1,19 @@
+{
+  "name": "T-Moto Garage",
+  "short_name": "T-Moto",
+  "description": "T-Moto Garage — Motosiklet bakım, onarım ve servis takibi.",
+  "start_url": "/T-Moto-Garage/",
+  "scope": "/T-Moto-Garage/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#080808",
+  "theme_color": "#080808",
+  "icons": [
+    {
+      "src": "/T-Moto-Garage/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
