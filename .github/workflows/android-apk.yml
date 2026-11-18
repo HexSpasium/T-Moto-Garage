@@ -1,0 +1,58 @@
+name: Build T-Moto Garage Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "src/**"
+      - "public/**"
+      - "index.html"
+      - "package.json"
+      - "capacitor.config.json"
+      - ".github/workflows/android-apk.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Install web dependencies
+        run: npm install
+      - name: Install Capacitor and asset tools
+        run: npm install --no-save @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7 @capacitor/assets
+      - name: Build web app
+        run: npm run build
+      - name: Prepare launcher icon
+        run: |
+          mkdir -p assets
+          convert -background none public/icons/icon.svg -resize 1024x1024 assets/icon.png
+          convert -size 2732x2732 xc:'#080808' assets/splash.png
+      - name: Generate Android icons
+        run: npx capacitor-assets generate --android
+      - name: Generate Android project
+        run: npx cap add android
+      - name: Sync native project
+        run: npx cap sync android
+      - name: Build APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+      - name: Publish APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: T-Moto-Garage-Android-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
