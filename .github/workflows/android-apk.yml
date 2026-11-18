@@ -35,6 +35,8 @@ jobs:
         run: npm install --no-save @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7 @capacitor/assets
       - name: Build web app
         run: npm run build
+      - name: Install image tooling
+        run: sudo apt-get update && sudo apt-get install -y imagemagick
       - name: Prepare launcher icon
         run: |
           mkdir -p assets
