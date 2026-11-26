@@ -109,7 +109,7 @@ function Home() {
 }
 
 function AdminLogin() {
-  const [email, setEmail] = useState("");
+  const [identity, setIdentity] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -117,24 +117,26 @@ function AdminLogin() {
 
   async function submit(e) {
     e.preventDefault(); setBusy(true); setError("");
-    if (!supabaseConfigured) { setError("Supabase bağlantısı yapılandırılmamış. .env dosyasını kontrol edin."); setBusy(false); return; }
+    if (!supabaseConfigured) { setError("Supabase bağlantısı yapılandırılmamış."); setBusy(false); return; }
+    const value = identity.trim();
+    const email = value.includes("@") ? value.toLowerCase() : `${value.toLowerCase()}@staff.tmoto.local`;
     const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
-    if (authError) setError(authError.message);
+    if (authError) setError("Kullanıcı adı/e-posta veya şifre hatalı.");
     else navigate("/admin/panel");
     setBusy(false);
   }
 
   return <main className="admin-page"><div className="admin-backdrop"/>
     <div className="admin-card"><Link to="/" className="back-link">← ANA SAYFA</Link><div className="admin-symbol"><KeyRound size={22}/></div>
-      <p className="eyebrow">T-MOTO GARAGE / YÖNETİM MERKEZİ</p><h1>YÖNETİCİ<br/><em>GİRİŞİ.</em></h1>
-      <p className="muted">Servis operasyonlarını yönetmek için oturum açın.</p>
+      <p className="eyebrow">T-MOTO GARAGE / YÖNETİM MERKEZİ</p><h1>PERSONEL<br/><em>GİRİŞİ.</em></h1>
+      <p className="muted">Merkez yönetici e-postası veya personel kullanıcı adıyla giriş yapın.</p>
       <form onSubmit={submit} className="admin-form">
-        <label>E-POSTA<input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="admin@tmotogarage.com" required/></label>
-        <label>ŞİFRE<input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••••••" required/></label>
+        <label>KULLANICI ADI / E-POSTA<input value={identity} onChange={e=>setIdentity(e.target.value)} placeholder="Kullanıcı adı veya e-posta" autoComplete="username" required/></label>
+        <label>ŞİFRE<input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••••••" autoComplete="current-password" required/></label>
         {error && <div className="form-error">{error}</div>}
         <button className="button button-primary full-button" disabled={busy}>{busy ? "GİRİŞ YAPILIYOR..." : "GÜVENLİ GİRİŞ YAP"} <ArrowUpRight size={16}/></button>
       </form>
-      <div className="admin-secure"><ShieldCheck size={15}/> KORUMALI YÖNETİCİ OTURUMU</div>
+      <div className="admin-secure"><ShieldCheck size={15}/> KORUMALI PERSONEL OTURUMU</div>
     </div>
   </main>;
 }
