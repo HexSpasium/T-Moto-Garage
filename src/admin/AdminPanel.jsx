@@ -1,5 +1,5 @@
 import {useCallback,useEffect,useMemo,useState} from "react";
-import {Activity,Bike,Boxes,ClipboardList,LayoutDashboard,LogOut,Plus,RefreshCw,Search,Users,Wrench,X,CheckCircle2,AlertCircle,QrCode,Copy,Pencil,Trash2,ImagePlus,FileImage,ShieldCheck} from "lucide-react";
+import {Activity,Bike,Boxes,ClipboardList,LayoutDashboard,LogOut,Plus,RefreshCw,Search,Users,Wrench,X,CheckCircle2,AlertCircle,QrCode,Copy,Pencil,Trash2,ImagePlus,FileImage,ShieldCheck,UserPlus} from "lucide-react";
 import KAREKODCode from "qrcode";
 import {supabase} from "../lib/supabase";
 
@@ -12,10 +12,17 @@ const blankPart=()=>({part_id:"",part_name:"",category:"",action:"replaced",quan
 
 export default function AdminPanel(){
  const [session,setSession]=useState(null),[staff,setStaff]=useState(null),[section,setSection]=useState("overview"),[search,setSearch]=useState("");
+ const [staffList,setStaffList]=useState([]),[staffModal,setStaffModal]=useState(false),[staffForm,setStaffForm]=useState({username:"",display_name:"",password:"",role:"usta",is_active:true}),[editingStaff,setEditingStaff]=useState(null);
  const [data,setData]=useState({customers:[],vehicles:[],services:[],parts:[],vehicleMedia:[],serviceMedia:[],serviceParts:[]});
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
  const [modal,setModal]=useState(false),[form,setForm]=useState({}),[editing,setEditing]=useState(false),[qr,setQr]=useState(null),[urls,setUrls]=useState({});
 
+ const loadStaff=useCallback(async()=>{
+  const {data,error}=await supabase.functions.invoke("manage-staff",{body:{action:"list"}});
+  if(error)throw error;
+  if(data?.error)throw new Error(data.error);
+  setStaffList(data?.staff||[]);
+ },[]);
  const load=useCallback(async()=>{
   setLoading(true);
   const q=await Promise.all([
@@ -33,7 +40,7 @@ export default function AdminPanel(){
   const links=await Promise.all(media.map(async m=>{const {data:r}=await supabase.storage.from(BUCKET).createSignedUrl(m.storage_path,3600);return [m.id,r?.signedUrl||""];}));
   setUrls(Object.fromEntries(links));setLoading(false);
  },[]);
- useEffect(()=>{let alive=true;(async()=>{const {data:a}=await supabase.auth.getSession();if(!alive)return;if(!a.session){location.assign("/T-Moto-Garage/admin");return;}setSession(a.session);const {data:r,error:e}=await supabase.from("admin_users").select("role,is_active").eq("user_id",a.session.user.id).maybeSingle();if(!alive)return;if(e||!r?.is_active){setError("Bu hesap için aktif yönetici yetkisi bulunamadı.");setLoading(false);return;}setStaff(r);await load();})();const {data:l}=supabase.auth.onAuthStateChange((_e,s)=>{if(!s)location.assign("/T-Moto-Garage/admin");});return()=>{alive=false;l.subscription.unsubscribe();};},[load]);
+ useEffect(()=>{let alive=true;(async()=>{const {data:a}=await supabase.auth.getSession();if(!alive)return;if(!a.session){location.assign("/T-Moto-Garage/admin");return;}setSession(a.session);const {data:r,error:e}=await supabase.from("admin_users").select("role,is_active,username,display_name").eq("user_id",a.session.user.id).maybeSingle();if(!alive)return;if(e||!r?.is_active){setError("Bu hesap için aktif yönetici yetkisi bulunamadı.");setLoading(false);return;}setStaff(r);await load();if(["owner","admin"].includes(r.role)){try{await loadStaff();}catch(x){setError(x.message||"Personel listesi yüklenemedi.");}}})();const {data:l}=supabase.auth.onAuthStateChange((_e,s)=>{if(!s)location.assign("/T-Moto-Garage/admin");});return()=>{alive=false;l.subscription.unsubscribe();};},[load,loadStaff]);
 
  const counts=useMemo(()=>({active:data.services.filter(x=>!["delivered","cancelled"].includes(x.status)).length}),[data.services]);
  const filtered=(items,fields)=>items.filter(x=>fields.some(f=>String(f.split(".").reduce((v,k)=>v?.[k],x)||"").toLocaleLowerCase("tr").includes(search.toLocaleLowerCase("tr"))));
@@ -113,15 +120,36 @@ export default function AdminPanel(){
  }
  async function publish(item){const {error:e}=await supabase.from("vehicles").update({is_published:!item.is_published}).eq("id",item.id);if(e)setError(e.message);else setNotice("Yayın ayarı güncellendi.");await load();}
  async function showQr(v){const url=location.origin+"/T-Moto-Garage/takip/"+v.qr_token;const image=await KAREKODCode.toDataURL(url,{width:420,margin:2});setQr({url,image,plate:v.plate,make:v.make,model:v.model});}
+ async function refreshStaff(){try{await loadStaff();}catch(x){setError(x.message||"Personel listesi yüklenemedi.");}}
+ function openStaffCreate(){setEditingStaff(null);setStaffForm({username:"",display_name:"",password:"",role:"usta",is_active:true});setStaffModal(true);setError("");}
+ function openStaffEdit(item){setEditingStaff(item);setStaffForm({username:item.username||"",display_name:item.display_name||"",password:"",role:item.role||"usta",is_active:item.is_active});setStaffModal(true);setError("");}
+ async function saveStaff(e){
+  e.preventDefault();setSaving(true);setError("");setNotice("");
+  try{
+   const body={action:editingStaff?"update":"create",username:staffForm.username,display_name:staffForm.display_name,password:staffForm.password,role:staffForm.role,is_active:staffForm.is_active};
+   if(editingStaff)body.user_id=editingStaff.user_id;
+   const {data,error}=await supabase.functions.invoke("manage-staff",{body});
+   if(error)throw error;if(data?.error)throw new Error(data.error);
+   setStaffModal(false);setNotice(editingStaff?"Personel bilgileri güncellendi.":"Personel hesabı oluşturuldu.");await loadStaff();
+  }catch(x){setError(x.message||"Personel kaydedilemedi.");}finally{setSaving(false);}
+ }
+ async function deleteStaff(item){
+  if(!confirm(item.display_name+" adlı personelin hesabı kalıcı olarak silinsin mi? Bu işlem geri alınamaz."))return;
+  setSaving(true);setError("");
+  try{const {data,error}=await supabase.functions.invoke("manage-staff",{body:{action:"delete",user_id:item.user_id}});if(error)throw error;if(data?.error)throw new Error(data.error);setNotice("Personel hesabı kalıcı olarak silindi.");await loadStaff();}
+  catch(x){setError(x.message||"Personel silinemedi.");}finally{setSaving(false);}
+ }
  async function signOut(){await supabase.auth.signOut();location.assign("/T-Moto-Garage/admin");}
- const menus=[["overview",LayoutDashboard,"Genel Bakış"],["services",ClipboardList,"Servis Kayıtları"],["vehicles",Bike,"Motosikletler"],["customers",Users,"Müşteriler"],["parts",Boxes,"Parça Kataloğu"]];
+ const baseMenus=[["overview",LayoutDashboard,"Genel Bakış"],["services",ClipboardList,"Servis Kayıtları"],["vehicles",Bike,"Motosikletler"],["customers",Users,"Müşteriler"],["parts",Boxes,"Parça Kataloğu"]];
+ const menus=["owner","admin"].includes(staff?.role)?[...baseMenus,["staff",Users,"Personel"]]:baseMenus;
  if(!session&&!error)return <main className="tm-admin-loading">GÜVENLİ OTURUM KONTROLÜ...</main>;
  if(error&&!staff)return <main className="tm-admin-loading"><p>{error}</p><button className="tm-button" onClick={signOut}>GİRİŞE DÖN</button></main>;
  return <main className="tm-admin">
   <aside className="tm-sidebar"><a className="tm-admin-brand" href="/T-Moto-Garage/"><span>T<span>·</span>M</span><b>T-MOTO<br/>GARAGE</b></a><small className="tm-side-caption">SERVİS YÖNETİMİ</small><nav>{menus.map(([k,I,l])=><button key={k} className={section===k?"active":""} onClick={()=>{setSection(k);setSearch("");}}><I size={17}/>{l}</button>)}</nav><div className="tm-sidebar-bottom"><b>{session?.user?.email}</b><small>{staff?.role?.toUpperCase()}</small><button onClick={signOut}><LogOut size={15}/> Güvenli çıkış</button></div></aside>
-  <section className="tm-main"><header className="tm-topbar"><div><small>YÖNETİM MERKEZİ</small><b>{menus.find(x=>x[0]===section)?.[2]}</b></div><button onClick={load}><RefreshCw size={16}/> Yenile</button></header><div className="tm-content">
-   <div className="tm-welcome"><div><small>T-MOTO GARAGE / OPERASYON</small><h1>{section==="overview"?"GARAJIN":menus.find(x=>x[0]===section)?.[2].toLocaleUpperCase("tr")} <em>{section==="overview"?"KONTROLÜ.":"YÖNETİMİ."}</em></h1><p>Servis operasyonlarınızı tek merkezden yönetin.</p></div>{section!=="overview"&&<button className="tm-button" onClick={()=>create(({services:"service",vehicles:"vehicle",customers:"customer",parts:"part"})[section])}><Plus size={16}/> Yeni kayıt</button>}</div>
+  <section className="tm-main"><header className="tm-topbar"><div><small>YÖNETİM MERKEZİ</small><b>{menus.find(x=>x[0]===section)?.[2]}</b></div><button onClick={()=>{load();if(["owner","admin"].includes(staff?.role))refreshStaff();}}><RefreshCw size={16}/> Yenile</button></header><div className="tm-content">
+   <div className="tm-welcome"><div><small>T-MOTO GARAGE / OPERASYON</small><h1>{section==="overview"?"GARAJIN":menus.find(x=>x[0]===section)?.[2].toLocaleUpperCase("tr")} <em>{section==="overview"?"KONTROLÜ.":"YÖNETİMİ."}</em></h1><p>Servis operasyonlarınızı tek merkezden yönetin.</p></div>{section!=="overview"&&<button className="tm-button" onClick={()=>section==="staff"?openStaffCreate():create(({services:"service",vehicles:"vehicle",customers:"customer",parts:"part"})[section])}><Plus size={16}/> Yeni kayıt</button>}</div>
    {error&&<div className="tm-alert"><AlertCircle size={16}/>{error}<button onClick={()=>setError("")}>×</button></div>}{notice&&<div className="tm-notice"><CheckCircle2 size={16}/>{notice}<button onClick={()=>setNotice("")}>×</button></div>}
+   {section==="staff"&&<div className="tm-panel"><div className="tm-panel-head"><h2>Personel hesapları</h2><span>{staffList.length} PERSONEL</span></div><p className="tm-muted">Kullanıcı adı ve şifreyle giriş yapan personel hesaplarını buradan yönetin. Merkez yönetici hesabı koruma altındadır.</p><StaffTable items={staffList} onEdit={openStaffEdit} onDelete={deleteStaff}/></div>}
    {section==="overview"&&<><div className="tm-stat-grid"><Stat Icon={ClipboardList} label="Toplam servis" value={data.services.length}/><Stat Icon={Activity} label="Aktif servis" value={counts.active}/><Stat Icon={Bike} label="Motosiklet" value={data.vehicles.length}/><Stat Icon={Users} label="Müşteri" value={data.customers.length}/></div><div className="tm-overview-grid"><div className="tm-panel"><PanelHead title="Son servis kayıtları" action="Tümünü gör →" onClick={()=>setSection("services")}/><ServiceTable items={data.services.slice(0,5)} onStatus={changeStatus} onEdit={x=>edit("service",x)}/></div><div className="tm-panel"><PanelHead title="Hızlı işlemler"/>{[["service","Servis kaydı",ClipboardList],["vehicle","Motosiklet",Bike],["customer","Müşteri",Users],["part","Parça",Boxes]].map(([k,l,I])=><button className="tm-quick" key={k} onClick={()=>create(k)}><I size={16}/>{l}<Plus size={14}/></button>)}</div></div><div className="tm-panel"><PanelHead title="Son eklenen motosikletler" action="Motosikletlere git →" onClick={()=>setSection("vehicles")}/><VehicleTable items={data.vehicles.slice(0,5)} onEdit={x=>edit("vehicle",x)} onQr={showQr} onPublish={publish}/></div></>}
    {section==="services"&&<div className="tm-panel"><Toolbar value={search} onChange={setSearch} placeholder="Servis no, plaka veya model ara"/><ServiceTable items={filtered(data.services,["service_number","vehicles.plate","vehicles.make","vehicles.model"])} onStatus={changeStatus} onEdit={x=>edit("service",x)}/></div>}
    {section==="vehicles"&&<div className="tm-panel"><Toolbar value={search} onChange={setSearch} placeholder="Plaka, marka, model veya müşteri ara"/><VehicleTable items={filtered(data.vehicles,["plate","make","model","customers.full_name"])} onEdit={x=>edit("vehicle",x)} onQr={showQr} onPublish={publish}/></div>}
@@ -130,6 +158,16 @@ export default function AdminPanel(){
    {loading&&<div className="tm-loading">VERİLER YÜKLENİYOR...</div>}
    {!loading&&!data.customers.length&&!data.vehicles.length&&!data.services.length&&<div className="tm-empty-state"><Wrench/><b>Garaj henüz boş.</b><span>İlk müşteri veya motosiklet kaydınızı oluşturun.</span><button className="tm-button" onClick={()=>create("customer")}><Plus size={15}/> İlk müşteriyi ekle</button></div>}
   </div></section>
+  {staffModal&&<div className="tm-modal-bg" onMouseDown={e=>{if(e.target===e.currentTarget)setStaffModal(false);}}><form className="tm-modal tm-entry-modal" onSubmit={saveStaff}>
+   <div className="tm-modal-head"><div><small>PERSONEL YÖNETİMİ</small><h2>{editingStaff?"Personeli düzenle":"Yeni personel ekle"}</h2></div><button type="button" onClick={()=>setStaffModal(false)}><X/></button></div>
+   <Field label="Ad soyad" required value={staffForm.display_name} set={v=>setStaffForm({...staffForm,display_name:v})}/>
+   <Field label="Kullanıcı adı" required value={staffForm.username} set={v=>setStaffForm({...staffForm,username:v.toLowerCase().replace(/\\s/g,"")})}/>
+   <Field label={editingStaff?"Yeni şifre (değiştirmeyeceksen boş bırak)":"Kullanıcı şifresi"} type="password" required={!editingStaff} value={staffForm.password} set={v=>setStaffForm({...staffForm,password:v})}/>
+   <SelectField label="Sistem yetkisi" value={staffForm.role} set={v=>setStaffForm({...staffForm,role:v})} options={[["admin","Tam yetkili"],["supervisor","Supervisor"],["usta","Usta"],["cirak","Çırak"]]}/>
+   {editingStaff&&<label className="tm-check"><input type="checkbox" checked={Boolean(staffForm.is_active)} onChange={e=>setStaffForm({...staffForm,is_active:e.target.checked})}/> Personel hesabı aktif</label>}
+   <p className="tm-private-note">Kullanıcı adı en az 3 karakter, şifre en az 8 karakter olmalıdır. Personelin e-posta adresi gerekmez.</p>
+   <div className="tm-modal-actions"><button type="button" className="tm-button tm-outline" onClick={()=>setStaffModal(false)}>Vazgeç</button><button className="tm-button" disabled={saving}>{saving?"Kaydediliyor...":editingStaff?"Değişiklikleri kaydet":"Personeli oluştur"}</button></div>
+  </form></div>}
   {qr&&<div className="tm-modal-bg" onMouseDown={e=>{if(e.target===e.currentTarget)setQr(null);}}><div className="tm-modal tm-qr-modal"><div className="tm-modal-head"><div><small>KAREKOD SERVİS BAĞLANTISI</small><h2>{qr.plate} · {qr.make} {qr.model}</h2></div><button onClick={()=>setQr(null)}><X/></button></div><img src={qr.image} alt="Servis KAREKOD kodu"/><p>{qr.url}</p><div className="tm-modal-actions"><button className="tm-button tm-outline" onClick={()=>navigator.clipboard?.writeText(qr.url)}><Copy size={15}/> Bağlantıyı kopyala</button><a className="tm-button" href={qr.image} download={"tmoto-qr-"+qr.plate+".png"}>KAREKOD indir</a></div></div></div>}
   {modal&&<div className="tm-modal-bg" onMouseDown={e=>{if(e.target===e.currentTarget)setModal(false);}}><form className="tm-modal tm-entry-modal" onSubmit={save}>
    <div className="tm-modal-head"><div><small>{editing?"KAYDI DÜZENLE":"YENİ KAYIT"}</small><h2>{{customer:"Müşteri",vehicle:"Motosiklet",service:"Servis kaydı",part:"Parça"}[form.kind]} {editing?"bilgileri":"oluştur"}</h2></div><button type="button" onClick={()=>setModal(false)}><X/></button></div>
@@ -156,4 +194,9 @@ function ServiceTable({items,onStatus,onEdit}){if(!items.length)return <Empty te
 function VehicleTable({items,onEdit,onQr,onPublish}){if(!items.length)return <Empty text="Henüz motosiklet kaydı yok."/>;return <div className="tm-table-wrap"><table className="tm-table"><thead><tr><th>MOTOSİKLET</th><th>PLAKA</th><th>MÜŞTERİ</th><th>KAREKOD</th><th>İŞLEM</th></tr></thead><tbody>{items.map(x=><tr key={x.id}><td><b>{x.make} {x.model}</b><small>{x.production_year||"—"} · {x.mileage_km||"—"} km</small></td><td>{x.plate}</td><td>{x.customers?.full_name||"—"}</td><td>{x.is_published?"YAYINDA":"GİZLİ"}</td><td><button className="tm-mini" onClick={()=>onEdit(x)}><Pencil size={13}/> Düzenle</button> <button className="tm-mini" onClick={()=>onQr(x)}><QrCode size={13}/> KAREKOD</button> <button className="tm-mini" onClick={()=>onPublish(x)}>{x.is_published?"Gizle":"Yayınla"}</button></td></tr>)}</tbody></table></div>}
 function CustomerTable({items,onEdit}){if(!items.length)return <Empty text="Henüz müşteri yok."/>;return <div className="tm-table-wrap"><table className="tm-table"><thead><tr><th>MÜŞTERİ</th><th>TELEFON</th><th>E-POSTA</th><th>KAYIT</th><th></th></tr></thead><tbody>{items.map(x=><tr key={x.id}><td>{x.full_name}</td><td>{x.phone||"—"}</td><td>{x.email||"—"}</td><td>{dateLabel(x.created_at)}</td><td><button className="tm-mini" onClick={()=>onEdit(x)}><Pencil size={13}/> Düzenle</button></td></tr>)}</tbody></table></div>}
 function PartsTable({items,onEdit}){if(!items.length)return <Empty text="Parça kataloğu boş."/>;return <div className="tm-table-wrap"><table className="tm-table"><thead><tr><th>PARÇA</th><th>KATEGORİ</th><th>MARKA</th><th>PARÇA NO</th><th></th></tr></thead><tbody>{items.map(x=><tr key={x.id}><td>{x.name}</td><td>{x.category}</td><td>{x.brand||"—"}</td><td>{x.part_number||"—"}</td><td><button className="tm-mini" onClick={()=>onEdit(x)}><Pencil size={13}/> Düzenle</button></td></tr>)}</tbody></table></div>}
+function StaffTable({items,onEdit,onDelete}){
+ if(!items.length)return <Empty text="Henüz personel hesabı oluşturulmamış."/>;
+ const labels={admin:"Tam yetkili",supervisor:"Supervisor",usta:"Usta",cirak:"Çırak",technician:"Teknisyen"};
+ return <div className="tm-table-wrap"><table className="tm-table"><thead><tr><th>PERSONEL</th><th>KULLANICI ADI</th><th>SİSTEM YETKİSİ</th><th>DURUM</th><th>İŞLEM</th></tr></thead><tbody>{items.map(x=><tr key={x.user_id}><td><b>{x.display_name||"—"}</b><small>{new Date(x.created_at).toLocaleDateString("tr-TR")}</small></td><td>{x.username}</td><td>{labels[x.role]||x.role}</td><td><span className={x.is_active?"tm-status-active":"tm-status-inactive"}>{x.is_active?"AKTİF":"PASİF"}</span></td><td><button className="tm-mini" onClick={()=>onEdit(x)}><Pencil size={13}/> Düzenle</button> <button className="tm-mini tm-danger" onClick={()=>onDelete(x)}><Trash2 size={13}/> Sil</button></td></tr>)}</tbody></table></div>;
+}
 function Empty({text}){return <div className="tm-empty">{text}</div>}
